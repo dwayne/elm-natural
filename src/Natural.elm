@@ -1,6 +1,7 @@
 module Natural exposing
     ( Natural
     , zero, one, two, ten
+    , fromInt
     )
 
 
@@ -53,3 +54,35 @@ two =
 ten : Natural
 ten =
     Natural [10]
+
+
+-- CONSTRUCT
+
+
+fromInt : Int -> Maybe Natural
+fromInt x =
+    if x >= 0 then
+        Just <| Natural <| fromIntHelper [] x
+
+    else
+        Nothing
+
+
+fromIntHelper : List Int -> Int -> List Int
+fromIntHelper digitsBE n =
+    if n == 0 then
+        List.reverse digitsBE
+
+    else
+        let
+            (q, r) =
+                divModBy base n
+        in
+        fromIntHelper (r :: digitsBE) q
+
+
+divModBy : Int -> Int -> (Int, Int)
+divModBy divisor dividend =
+    ( dividend // divisor
+    , modBy divisor dividend
+    )
