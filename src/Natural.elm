@@ -61,11 +61,16 @@ ten =
 
 fromInt : Int -> Maybe Natural
 fromInt x =
-    if x >= 0 then
+    if x >= 0 && x <= maxSafeInteger then
         Just <| Natural <| fromIntHelper [] x
 
     else
         Nothing
+
+
+maxSafeInteger : Int
+maxSafeInteger =
+    2 ^ 53 - 1
 
 
 fromIntHelper : List Int -> Int -> List Int
@@ -75,14 +80,10 @@ fromIntHelper digitsBE n =
 
     else
         let
-            (q, r) =
-                divModBy base n
+            q =
+                floor (toFloat n / toFloat base)
+
+            r =
+                modBy base n
         in
         fromIntHelper (r :: digitsBE) q
-
-
-divModBy : Int -> Int -> (Int, Int)
-divModBy divisor dividend =
-    ( dividend // divisor
-    , modBy divisor dividend
-    )
