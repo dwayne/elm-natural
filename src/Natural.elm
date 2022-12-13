@@ -3,6 +3,9 @@ module Natural exposing
     , zero, one, two, ten
     , fromInt
     , toInt
+
+    -- For testing purposes
+    , sdAdd
     )
 
 
@@ -147,6 +150,37 @@ toIntHelper mask x digitsBE =
                 baseMask
                 (x * base + Bitwise.and digit mask)
                 restDigitsBE
+
+
+-- SINGLE-DIGIT OPERATIONS
+
+
+sdAdd : List Int -> Int -> List Int -> List Int
+sdAdd xs y zs =
+    --
+    -- zs = xs + y
+    --
+    -- Assumptions
+    --
+    -- 1. xs = [ x_0, x_1, ..., x_n ] (LE) and 0 <= xi <= base-1
+    -- 2. 0 <= y <= base-1
+    -- 3. zs = [ z_m, ..., z_1, z_0 ] (BE) and 0 <= zj <= base-1
+    --
+    case xs of
+        [] ->
+            List.reverse <|
+                if y == 0 then
+                    zs
+
+                else
+                    y :: zs
+
+        x :: restXs ->
+            let
+                (carry, z) =
+                    divModBy base (x + y)
+            in
+            sdAdd restXs carry (z :: zs)
 
 
 -- MISC
