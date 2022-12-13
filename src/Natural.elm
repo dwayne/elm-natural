@@ -5,7 +5,7 @@ module Natural exposing
     , toInt
 
     -- For testing purposes
-    , sdAdd
+    , sdAdd, sdSub
     )
 
 
@@ -183,7 +183,45 @@ sdAdd xs y zs =
             sdAdd restXs carry (z :: zs)
 
 
--- MISC
+sdSub : List Int -> Int -> List Int -> List Int
+sdSub xs y zs =
+    --
+    -- zs = xs - y
+    --
+    -- Assumptions
+    --
+    -- 1. xs = [ x_0, x_1, ..., x_n ] (LE) and 0 <= xi <= base-1
+    -- 2. 0 <= y <= base-1
+    -- 3. valueOf xs >= valueOf y
+    -- 4. zs = [ z_m, ..., z_1, z_0 ] (BE) and 0 <= zj <= base-1
+    --
+    case xs of
+        [] ->
+            zs
+                |> removeLeadingZeros
+                |> List.reverse
+
+        x :: restXs ->
+            let
+                diff =
+                    x - y
+
+                (carry, z) =
+                    if diff >= 0 then
+                        ( 0
+                        , diff
+                        )
+
+                    else
+                        ( 1
+                        , diff + base
+                        )
+
+            in
+            sdSub restXs carry (z :: zs)
+
+
+-- HELPERS
 
 
 divModBy : Int -> Int -> (Int, Int)
@@ -196,3 +234,17 @@ divModBy divisor dividend =
 padLeft : Int -> a -> List a -> List a
 padLeft n x list =
     List.repeat (n - List.length list) x ++ list
+
+
+removeLeadingZeros : List Int -> List Int
+removeLeadingZeros digitsBE =
+    case digitsBE of
+        [] ->
+            []
+
+        d :: restDigitsBE ->
+            if d == 0 then
+                removeLeadingZeros restDigitsBE
+
+            else
+                digitsBE
