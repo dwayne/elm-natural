@@ -282,16 +282,14 @@ sdDivMod xs y qs r =
     -- 3. qs = [ q_m, ..., q_1, q_0 ] (BE) and 0 <= qj <= base-1
     -- 4. 0 <= r <= base-1
     --
-    sdDivModHelper (List.reverse xs) y qs r
+    sdDivModHelper (List.reverse xs) y True qs r
 
 
-sdDivModHelper : List Int -> Int -> List Int -> Int -> (List Int, Int)
-sdDivModHelper xs y qs r =
+sdDivModHelper : List Int -> Int -> Bool -> List Int -> Int -> (List Int, Int)
+sdDivModHelper xs y isTrailingZero qs r =
     case xs of
         [] ->
-            ( removeTrailingZeros qs
-            , r
-            )
+            (qs, r)
 
         x :: restXs ->
             let
@@ -319,7 +317,11 @@ sdDivModHelper xs y qs r =
                 (q, newR) =
                     divModBy y value
             in
-            sdDivModHelper restXs y (q :: qs) newR
+            if isTrailingZero && q == 0 then
+                sdDivModHelper restXs y isTrailingZero qs newR
+
+            else
+                sdDivModHelper restXs y False (q :: qs) newR
 
 
 -- HELPERS
@@ -349,8 +351,3 @@ removeLeadingZeros digits =
 
             else
                 digits
-
-
-removeTrailingZeros : List Int -> List Int
-removeTrailingZeros =
-    List.reverse >> removeLeadingZeros >> List.reverse
