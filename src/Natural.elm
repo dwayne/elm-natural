@@ -5,7 +5,7 @@ module Natural exposing
     , toInt
 
     -- For testing purposes
-    , sdAdd, sdSub, sdMul
+    , sdAdd, sdSub, sdMul, sdDivMod
     )
 
 
@@ -270,6 +270,58 @@ sdMul xs y carry zs =
             sdMul restXs y newCarry (z :: zs)
 
 
+sdDivMod : List Int -> Int -> List Int -> Int -> (List Int, Int)
+sdDivMod xs y qs r =
+    --
+    -- xs = qs * y + r
+    --
+    -- Assumptions
+    --
+    -- 1. xs = [ x_0, x_1, ..., x_n ] (LE) and 0 <= xi <= base-1
+    -- 2. 0 < y <= base-1
+    -- 3. qs = [ q_m, ..., q_1, q_0 ] (BE) and 0 <= qj <= base-1
+    -- 4. 0 <= r <= base-1
+    --
+    sdDivModHelper (List.reverse xs) y qs r
+
+
+sdDivModHelper : List Int -> Int -> List Int -> Int -> (List Int, Int)
+sdDivModHelper xs y qs r =
+    case xs of
+        [] ->
+            ( removeTrailingZeros qs
+            , r
+            )
+
+        x :: restXs ->
+            let
+                -- value constrains how large the base can be.
+                --
+                -- 0 <= value <= (base-1)*base + base-1
+                --            <= base^2 - 1
+                --
+                -- And, we want
+                --
+                -- base^2 - 1 <= maxSafeInteger
+                --
+                -- Since we want base to be a power of 2, i.e. base = 2^n, then
+                --
+                -- 2^{2n} - 1 <= maxSafeInteger
+                --            <= 2^53 - 1
+                --     2^{2n} <= 2^53
+                --         2n <= 53
+                --
+                -- This gives n <= 26, i.e. the maximum base we will be able to
+                -- use is 2^26.
+                value =
+                    r * base + x
+
+                (q, newR) =
+                    divModBy y value
+            in
+            sdDivModHelper restXs y (q :: qs) newR
+
+
 -- HELPERS
 
 
@@ -286,14 +338,19 @@ padLeft n x list =
 
 
 removeLeadingZeros : List Int -> List Int
-removeLeadingZeros digitsBE =
-    case digitsBE of
+removeLeadingZeros digits =
+    case digits of
         [] ->
             []
 
-        d :: restDigitsBE ->
+        d :: restDigits ->
             if d == 0 then
-                removeLeadingZeros restDigitsBE
+                removeLeadingZeros restDigits
 
             else
-                digitsBE
+                digits
+
+
+removeTrailingZeros : List Int -> List Int
+removeTrailingZeros =
+    List.reverse >> removeLeadingZeros >> List.reverse
