@@ -4,6 +4,7 @@ in
 pkgs.mkShell {
   packages = [
     pkgs.elmPackages.elm
+    pkgs.racket
   ];
 
   shellHook =

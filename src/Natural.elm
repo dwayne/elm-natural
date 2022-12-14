@@ -5,7 +5,7 @@ module Natural exposing
     , toInt
 
     -- For testing purposes
-    , sdAdd, sdSub
+    , sdAdd, sdSub, sdMul
     )
 
 
@@ -219,6 +219,55 @@ sdSub xs y zs =
 
             in
             sdSub restXs carry (z :: zs)
+
+
+sdMul : List Int -> Int -> Int -> List Int -> List Int
+sdMul xs y carry zs =
+    --
+    -- zs = xs * y + carry
+    --
+    -- Assumptions
+    --
+    -- 1. xs = [ x_0, x_1, ..., x_n ] (LE) and 0 <= xi <= base-1
+    -- 2. 0 <= y <= base-1
+    -- 3. 0 <= carry <= base-2
+    -- 4. zs = [ z_m, ..., z_1, z_0 ] (BE) and 0 <= zj <= base-1
+    --
+    case xs of
+        [] ->
+            List.reverse <|
+                if carry == 0 then
+                    zs
+
+                else
+                    carry :: zs
+
+        x :: restXs ->
+            let
+                -- product constrains how large the base can be.
+                --
+                -- 0 <= product <= (base-1)(base-1) + base-2
+                --              <= base^2 - base - 1
+                --
+                -- And, we want
+                --
+                -- base^2 - base - 1 <= maxSafeInteger
+                --
+                -- Since we want base to be a power of 2, i.e. base = 2^n, then
+                --
+                -- 2^{2n} - 2^n - 1 <= maxSafeInteger
+                --                  <= 2^53 - 1
+                --     2^{2n} - 2^n <= 2^53
+                --
+                -- This gives n <= 26, i.e. the maximum base we will be able to
+                -- use is 2^26.
+                product =
+                    x * y + carry
+
+                (newCarry, z) =
+                    divModBy base product
+            in
+            sdMul restXs y newCarry (z :: zs)
 
 
 -- HELPERS
