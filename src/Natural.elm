@@ -1,7 +1,7 @@
 module Natural exposing
     ( Natural
     , zero, one, two, ten
-    , fromInt
+    , fromInt, fromBaseBString
     , toInt
 
     -- For testing purposes
@@ -15,14 +15,18 @@ import Bitwise
 -- REPRESENTATION
 
 
-numBits : Int
-numBits =
-    4
-
-
 base : Int
 base =
+    -- Constraints:
+    --
+    -- base-1 >= 36 (fromBaseBString)
+    -- base <= 2^26 (sdMul, sdDivMod)
     2 ^ numBits
+
+
+numBits : Int
+numBits =
+    26
 
 
 baseMask : Int
@@ -104,6 +108,69 @@ fromIntHelper digitsBE n =
                 modBy base n
         in
         fromIntHelper (r :: digitsBE) q
+
+
+fromBaseBString : Int -> String -> Maybe Natural
+fromBaseBString b input =
+    if b >= 2 && b <= 36 && isBaseBString b input then
+        Just <| Natural <|
+            String.foldl
+                -- To satisfy the assumptions of sdAdd and sdMul
+                -- we need base-1 >= b.
+                (\char x -> sdAdd (sdMul x b 0 []) (toBaseBDigit b char) [])
+                []
+                input
+
+    else
+        Nothing
+
+
+isBaseBString : Int -> String -> Bool
+isBaseBString b input =
+    --
+    -- Assumptions
+    --
+    -- 1. 2 <= b <= 36
+    --
+    input /= "" && String.all (isBaseBChar b) input
+
+
+isBaseBChar : Int -> Char -> Bool
+isBaseBChar b char =
+    --
+    -- Assumptions
+    --
+    -- 1. 2 <= b <= 36
+    --
+    let
+        code =
+            Char.toCode char
+    in
+    (0x30 <= code && code <= min (0x30 + b - 1) 0x39)
+    || (0x41 <= code && code <= 0x41 + b - 11)
+    || (0x61 <= code && code <= 0x61 + b - 11)
+
+
+toBaseBDigit : Int -> Char -> Int
+toBaseBDigit b char =
+    --
+    -- Assumptions
+    --
+    -- 1. 2 <= b <= 36
+    -- 2. isBaseBChar b char == True
+    --
+    let
+        code =
+            Char.toCode char
+    in
+    if (0x30 <= code && code <= min (0x30 + b - 1) 0x39) then
+        code - 0x30
+
+    else if (0x41 <= code && code <= 0x41 + b - 11) then
+        code - 0x41 + 10
+
+    else
+        code - 0x61 + 10
 
 
 -- CONVERT
