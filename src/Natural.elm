@@ -2,7 +2,7 @@ module Natural exposing
     ( Natural
     , zero, one, two, ten
     , fromInt, fromBaseBString
-    , toInt
+    , toInt, toBaseBString
 
     -- For testing purposes
     , sdAdd, sdSub, sdMul, sdDivMod
@@ -112,7 +112,7 @@ fromIntHelper digitsBE n =
 
 fromBaseBString : Int -> String -> Maybe Natural
 fromBaseBString b input =
-    if b >= 2 && b <= 36 && isBaseBString b input then
+    if isBaseB b && isBaseBString b input then
         Just <| Natural <|
             String.foldl
                 -- To satisfy the assumptions of sdAdd and sdMul
@@ -130,7 +130,7 @@ isBaseBString b input =
     --
     -- Assumptions
     --
-    -- 1. 2 <= b <= 36
+    -- 1. isBaseB b
     --
     input /= "" && String.all (isBaseBChar b) input
 
@@ -140,7 +140,7 @@ isBaseBChar b char =
     --
     -- Assumptions
     --
-    -- 1. 2 <= b <= 36
+    -- 1. isBaseB b
     --
     let
         code =
@@ -156,8 +156,8 @@ toBaseBDigit b char =
     --
     -- Assumptions
     --
-    -- 1. 2 <= b <= 36
-    -- 2. isBaseBChar b char == True
+    -- 1. isBaseB b
+    -- 2. isBaseBChar b char
     --
     let
         code =
@@ -217,6 +217,53 @@ toIntHelper mask x digitsBE =
                 baseMask
                 (x * base + Bitwise.and digit mask)
                 restDigitsBE
+
+
+toBaseBString : Int -> Natural -> Maybe String
+toBaseBString b (Natural xs) =
+    if isBaseB b then
+        Just <| toBaseBStringHelper b xs ""
+
+    else
+        Nothing
+
+
+toBaseBStringHelper : Int -> List Int -> String -> String
+toBaseBStringHelper b xs result =
+    case xs of
+        [] ->
+            if result == "" then
+                "0"
+
+            else
+                result
+
+        _ ->
+            let
+                (q, r) =
+                    sdDivMod xs b [] 0
+            in
+            toBaseBStringHelper b q (String.cons (toBaseBChar r) result)
+
+
+toBaseBChar : Int -> Char
+toBaseBChar offset =
+    --
+    -- Assumptions
+    --
+    -- 1. 0 <= offset <= b-1, where isBaseB b is True for some b
+    --
+    Char.fromCode <|
+        if offset < 10 then
+            0x30 + offset
+
+        else
+            0x61 + offset - 10
+
+
+isBaseB : Int -> Bool
+isBaseB b =
+    2 <= b && b <= 36
 
 
 -- SINGLE-DIGIT OPERATIONS
