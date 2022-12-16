@@ -1,7 +1,9 @@
 module Natural exposing
     ( Natural
     , zero, one, two, ten
-    , fromInt, fromBaseBString
+    , fromInt
+    , fromBinaryString, fromOctalString, fromHexString
+    , fromBaseBString
     , toInt, toBaseBString
 
     -- For testing purposes
@@ -108,6 +110,24 @@ fromIntHelper digitsBE n =
                 modBy base n
         in
         fromIntHelper (r :: digitsBE) q
+
+
+fromBinaryString : String -> Maybe Natural
+fromBinaryString =
+    -- Format: one or more binary digits.
+    fromBaseBString 2
+
+
+fromOctalString : String -> Maybe Natural
+fromOctalString =
+    -- Format: one or more octal digits.
+    fromBaseBString 8
+
+
+fromHexString : String -> Maybe Natural
+fromHexString =
+    -- Format: one or more hexadecimal digits.
+    fromBaseBString 16
 
 
 fromBaseBString : Int -> String -> Maybe Natural
