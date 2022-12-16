@@ -6,6 +6,7 @@ module Natural exposing
     , fromBaseBString
     , compare
     , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
+    , max, min
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
     , toBaseBString
@@ -199,7 +200,7 @@ isBaseBChar b char =
         code =
             Char.toCode char
     in
-    (0x30 <= code && code <= min (0x30 + b - 1) 0x39)
+    (0x30 <= code && code <= Basics.min (0x30 + b - 1) 0x39)
     || (0x41 <= code && code <= 0x41 + b - 11)
     || (0x61 <= code && code <= 0x61 + b - 11)
 
@@ -216,7 +217,7 @@ toBaseBDigit b char =
         code =
             Char.toCode char
     in
-    if (0x30 <= code && code <= min (0x30 + b - 1) 0x39) then
+    if (0x30 <= code && code <= Basics.min (0x30 + b - 1) 0x39) then
         code - 0x30
 
     else if (0x41 <= code && code <= 0x41 + b - 11) then
@@ -297,6 +298,24 @@ isGreaterThanOrEqual b a =
     --
     -- a >= b iff not (a < b)
     not (a |> isLessThan b)
+
+
+max : Natural -> Natural -> Natural
+max a b =
+    if a |> isGreaterThanOrEqual b then
+        a
+
+    else
+        b
+
+
+min : Natural -> Natural -> Natural
+min a b =
+    if a |> isLessThanOrEqual b then
+        a
+
+    else
+        b
 
 
 -- CONVERT
