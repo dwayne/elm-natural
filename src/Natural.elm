@@ -1,6 +1,6 @@
 module Natural exposing
     ( Natural
-    , zero, one, two, ten
+    , zero, one, two, three, four, five, six, seven, eight, nine, ten
     , fromInt
     , fromBinaryString, fromOctalString, fromHexString, fromString
     , fromBaseBString
@@ -72,6 +72,41 @@ one =
 two : Natural
 two =
     Natural [2]
+
+
+three : Natural
+three =
+    Natural [3]
+
+
+four : Natural
+four =
+    Natural [4]
+
+
+five : Natural
+five =
+    Natural [5]
+
+
+six : Natural
+six =
+    Natural [6]
+
+
+seven : Natural
+seven =
+    Natural [7]
+
+
+eight : Natural
+eight =
+    Natural [8]
+
+
+nine : Natural
+nine =
+    Natural [9]
 
 
 ten : Natural
