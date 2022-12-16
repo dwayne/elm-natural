@@ -5,6 +5,7 @@ module Natural exposing
     , fromBinaryString, fromOctalString, fromHexString, fromString
     , fromBaseBString
     , compare
+    , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
     , toBaseBString
@@ -268,6 +269,34 @@ compareHelper xsBE ysBE =
 
         _ ->
             EQ
+
+
+isLessThan : Natural -> Natural -> Bool
+isLessThan b a =
+    -- Is a < b?
+    compare a b == LT
+
+
+isLessThanOrEqual : Natural -> Natural -> Bool
+isLessThanOrEqual b a =
+    -- Is a <= b?
+    --
+    -- a <= b iff not (a > b)
+    not (a |> isGreaterThan b)
+
+
+isGreaterThan : Natural -> Natural -> Bool
+isGreaterThan b a =
+    -- Is a > b?
+    compare a b == GT
+
+
+isGreaterThanOrEqual : Natural -> Natural -> Bool
+isGreaterThanOrEqual b a =
+    -- Is a >= b?
+    --
+    -- a >= b iff not (a < b)
+    not (a |> isLessThan b)
 
 
 -- CONVERT
