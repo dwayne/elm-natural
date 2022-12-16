@@ -4,6 +4,7 @@ module Natural exposing
     , fromInt
     , fromBinaryString, fromOctalString, fromHexString, fromString
     , fromBaseBString
+    , compare
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
     , toBaseBString
@@ -222,6 +223,51 @@ toBaseBDigit b char =
 
     else
         code - 0x61 + 10
+
+
+-- COMPARISON
+
+
+compare : Natural -> Natural -> Order
+compare (Natural xsLE) (Natural ysLE) =
+    let
+        xsLen =
+            List.length xsLE
+
+        ysLen =
+            List.length ysLE
+    in
+    if xsLen < ysLen then
+        LT
+
+    else if xsLen > ysLen then
+        GT
+
+    else
+        compareHelper (List.reverse xsLE) (List.reverse ysLE)
+
+
+compareHelper : List Int -> List Int -> Order
+compareHelper xsBE ysBE =
+    --
+    -- Assumptions
+    --
+    -- 1. xsBE = [ x_n, ..., x_1, x_0 ] (BE) and 0 <= xi <= base-1
+    -- 2. ysBE = [ y_n, ..., y_1, y_0 ] (BE) and 0 <= yi <= base-1
+    --
+    case (xsBE, ysBE) of
+        (x :: restXsBE, y :: restYsBE) ->
+            if x < y then
+                LT
+
+            else if x > y then
+                GT
+
+            else
+                compareHelper restXsBE restYsBE
+
+        _ ->
+            EQ
 
 
 -- CONVERT
