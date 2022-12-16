@@ -4,7 +4,9 @@ module Natural exposing
     , fromInt
     , fromBinaryString, fromOctalString, fromHexString, fromString
     , fromBaseBString
-    , toInt, toBaseBString
+    , toInt
+    , toBinaryString, toOctalString, toHexString, toString
+    , toBaseBString
 
     -- For testing purposes
     , sdAdd, sdSub, sdMul, sdDivMod
@@ -266,6 +268,26 @@ toIntHelper mask x digitsBE =
                 baseMask
                 (x * base + Bitwise.and digit mask)
                 restDigitsBE
+
+
+toBinaryString : Natural -> String
+toBinaryString =
+    toBaseBString 2 >> Maybe.withDefault ""
+
+
+toOctalString : Natural -> String
+toOctalString =
+    toBaseBString 8 >> Maybe.withDefault ""
+
+
+toHexString : Natural -> String
+toHexString =
+    toBaseBString 16 >> Maybe.withDefault ""
+
+
+toString : Natural -> String
+toString =
+    toBaseBString 10 >> Maybe.withDefault ""
 
 
 toBaseBString : Int -> Natural -> Maybe String
