@@ -2,7 +2,7 @@ module Natural exposing
     ( Natural
     , zero, one, two, ten
     , fromInt
-    , fromBinaryString, fromOctalString, fromHexString
+    , fromBinaryString, fromOctalString, fromHexString, fromString
     , fromBaseBString
     , toInt, toBaseBString
 
@@ -128,6 +128,35 @@ fromHexString : String -> Maybe Natural
 fromHexString =
     -- Format: one or more hexadecimal digits.
     fromBaseBString 16
+
+
+fromString : String -> Maybe Natural
+fromString input =
+    -- input   ::= ('0b' | '0B') binary
+    --           | ('0o' | '0O') octal
+    --           | ('0x' | '0X') hex
+    --           | decimal
+    -- binary  ::= [0-1]+
+    -- octal   ::= [0-7]+
+    -- hex     ::= [0-9a-fA-F]+
+    -- decimal ::= [0-9]+
+    if String.startsWith "0b" input || String.startsWith "0B" input then
+        input
+            |> String.dropLeft 2
+            |> fromBinaryString
+
+    else if String.startsWith "0o" input || String.startsWith "0O" input then
+        input
+            |> String.dropLeft 2
+            |> fromOctalString
+
+    else if String.startsWith "0x" input || String.startsWith "0X" input then
+        input
+            |> String.dropLeft 2
+            |> fromHexString
+
+    else
+        fromBaseBString 10 input
 
 
 fromBaseBString : Int -> String -> Maybe Natural
