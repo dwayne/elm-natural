@@ -8,6 +8,7 @@ module Natural exposing
     , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
     , max, min
     , isZero, isNonZero
+    , add
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
     , toBaseBString
@@ -365,6 +366,59 @@ isZero (Natural digits) =
 isNonZero : Natural -> Bool
 isNonZero =
     not << isZero
+
+
+-- ARITHMETIC
+
+
+add : Natural -> Natural -> Natural
+add (Natural xsLE) (Natural ysLE) =
+    Natural <| addHelper xsLE ysLE 0 []
+
+
+addHelper : List Int -> List Int -> Int -> List Int -> List Int
+addHelper xsLE ysLE carry zsBE =
+    --
+    -- Assumptions
+    --
+    -- 1. xsLE = [ x_0, x_1, ..., x_n ] (LE) and 0 <= xi <= base-1
+    -- 2. ysLE = [ y_0, y_1, ..., y_m ] (LE) and 0 <= yi <= base-1
+    -- 3. carry = 0 or 1
+    -- 4. zsBE = [ z_k, ..., z_1, z_0 ] (BE) and 0 <= zi <= base-1
+    --
+    case (xsLE, ysLE) of
+        ([], []) ->
+            let
+                finalZsBE =
+                    if carry == 0 then
+                        zsBE
+
+                    else
+                        carry :: zsBE
+            in
+            List.reverse finalZsBE
+
+        (x :: restXsLE, []) ->
+            let
+                (newCarry, z) =
+                    x + carry |> divModBy base
+            in
+            addHelper restXsLE [] newCarry (z :: zsBE)
+
+        ([], y :: restYsLE) ->
+            let
+                (newCarry, z) =
+                    y + carry |> divModBy base
+            in
+            addHelper [] restYsLE newCarry (z :: zsBE)
+
+        (x :: restXsLE, y :: restYsLE) ->
+            let
+                (newCarry, z) =
+                    x + y + carry |> divModBy base
+            in
+            addHelper restXsLE restYsLE newCarry (z :: zsBE)
+
 
 
 -- CONVERT
