@@ -7,6 +7,7 @@ module Natural exposing
     , compare
     , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
     , max, min
+    , isZero, isNonZero
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
     , toBaseBString
@@ -351,6 +352,19 @@ min a b =
 
     else
         b
+
+
+-- CLASSIFICATION
+
+
+isZero : Natural -> Bool
+isZero (Natural digits) =
+    digits == []
+
+
+isNonZero : Natural -> Bool
+isNonZero =
+    not << isZero
 
 
 -- CONVERT
