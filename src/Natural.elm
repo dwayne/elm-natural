@@ -8,7 +8,7 @@ module Natural exposing
     , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
     , max, min
     , isZero, isNonZero
-    , add
+    , add, sub
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
     , toBaseBString
@@ -145,11 +145,8 @@ fromIntHelper digitsBE n =
 
     else
         let
-            q =
-                floor (toFloat n / toFloat base)
-
-            r =
-                modBy base n
+            (q, r) =
+                n |> quotientModBy base
         in
         fromIntHelper (r :: digitsBE) q
 
@@ -418,6 +415,57 @@ addHelper xsLE ysLE carry zsBE =
                     x + y + carry |> divModBy base
             in
             addHelper restXsLE restYsLE newCarry (z :: zsBE)
+
+
+sub : Natural -> Natural -> Natural
+sub (Natural xsLE) (Natural ysLE) =
+    -- Saturating subtraction
+    --
+    -- x - y = n, where n + y = x and n is a natural number (if x >= y)
+    --       = 0                                            (if x < y)
+    Natural <| subHelper xsLE ysLE 0 []
+
+
+subHelper : List Int -> List Int -> Int -> List Int -> List Int
+subHelper xsLE ysLE carry zsBE =
+    --
+    -- Assumptions
+    --
+    -- 1. xsLE = [ x_0, x_1, ..., x_n ] (LE) and 0 <= xi <= base-1
+    -- 2. ysLE = [ y_0, y_1, ..., y_m ] (LE) and 0 <= yi <= base-1
+    -- 3. carry = 0 or -1
+    -- 4. zsBE = [ z_k, ..., z_1, z_0 ] (BE) and 0 <= zi <= base-1
+    --
+    case (xsLE, ysLE) of
+        ([], []) ->
+            if carry == 0 then
+                zsBE
+                    |> removeLeadingZeros
+                    |> List.reverse
+
+            else -- carry == -1 which means xsLE < ysLE
+                []
+
+        (x :: restXsLE, []) ->
+            let
+                (newCarry, z) =
+                    x + carry |> quotientModBy base
+            in
+            subHelper restXsLE [] newCarry (z :: zsBE)
+
+        ([], y :: restYsLE) ->
+            let
+                (newCarry, z) =
+                    carry - y |> quotientModBy base
+            in
+            subHelper [] restYsLE newCarry (z :: zsBE)
+
+        (x :: restXsLE, y :: restYsLE) ->
+            let
+                (newCarry, z) =
+                    x - y + carry |> quotientModBy base
+            in
+            subHelper restXsLE restYsLE newCarry (z :: zsBE)
 
 
 
@@ -719,6 +767,13 @@ divModBy divisor dividend =
 padLeft : Int -> a -> List a -> List a
 padLeft n x list =
     List.repeat (n - List.length list) x ++ list
+
+
+quotientModBy : Int -> Int -> (Int, Int)
+quotientModBy divisor dividend =
+    ( floor (toFloat dividend / toFloat divisor)
+    , modBy divisor dividend
+    )
 
 
 removeLeadingZeros : List Int -> List Int
