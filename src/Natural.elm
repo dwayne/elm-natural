@@ -8,7 +8,7 @@ module Natural exposing
     , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
     , max, min
     , isZero, isNonZero
-    , add, sub
+    , add, sub, mul
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
     , toBaseBString
@@ -467,6 +467,44 @@ subHelper xsLE ysLE carry zsBE =
             in
             subHelper restXsLE restYsLE newCarry (z :: zsBE)
 
+
+mul : Natural -> Natural -> Natural
+mul (Natural xsLE) (Natural ysLE) =
+    Natural <| mulHelper xsLE (List.reverse ysLE) []
+
+
+mulHelper : List Int -> List Int -> List Int -> List Int
+mulHelper xsLE ysBE zsLE =
+    --
+    -- Assumptions
+    --
+    -- 1. xsLE = [ x_0, x_1, ..., x_n ] (LE) and 0 <= xi <= base-1
+    -- 2. ysBE = [ y_m, ..., y_1, y_0 ] (BE) and 0 <= yi <= base-1
+    -- 3. zsLE = [ z_0, z_1, ..., z_k ] (LE) and 0 <= zi <= base-1
+    --
+    case ysBE of
+        [] ->
+            zsLE
+
+        y :: restYsBE ->
+            let
+                -- base * zsLE
+                augend =
+                    if zsLE == [] then
+                        []
+
+                    else
+                        0 :: zsLE
+
+                -- xsLE * y
+                addend =
+                    sdMul xsLE y 0 []
+
+                -- (base * zsLE) + (xsLE * y)
+                partialSum =
+                    addHelper augend addend 0 []
+            in
+            mulHelper xsLE restYsBE partialSum
 
 
 -- CONVERT
