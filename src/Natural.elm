@@ -19,6 +19,7 @@ module Natural exposing
 
 
 import Bitwise
+import Lib
 
 
 -- REPRESENTATION
@@ -146,7 +147,7 @@ fromIntHelper digitsBE n =
     else
         let
             (q, r) =
-                n |> quotientModBy base
+                n |> Lib.quotientModBy base
         in
         fromIntHelper (r :: digitsBE) q
 
@@ -398,21 +399,21 @@ addHelper xsLE ysLE carry zsBE =
         (x :: restXsLE, []) ->
             let
                 (newCarry, z) =
-                    x + carry |> divModBy base
+                    x + carry |> Lib.divModBy base
             in
             addHelper restXsLE [] newCarry (z :: zsBE)
 
         ([], y :: restYsLE) ->
             let
                 (newCarry, z) =
-                    y + carry |> divModBy base
+                    y + carry |> Lib.divModBy base
             in
             addHelper [] restYsLE newCarry (z :: zsBE)
 
         (x :: restXsLE, y :: restYsLE) ->
             let
                 (newCarry, z) =
-                    x + y + carry |> divModBy base
+                    x + y + carry |> Lib.divModBy base
             in
             addHelper restXsLE restYsLE newCarry (z :: zsBE)
 
@@ -440,7 +441,7 @@ subHelper xsLE ysLE carry zsBE =
         ([], []) ->
             if carry == 0 then
                 zsBE
-                    |> removeLeadingZeros
+                    |> Lib.removeLeadingZeros
                     |> List.reverse
 
             else -- carry == -1 which means xsLE < ysLE
@@ -449,21 +450,21 @@ subHelper xsLE ysLE carry zsBE =
         (x :: restXsLE, []) ->
             let
                 (newCarry, z) =
-                    x + carry |> quotientModBy base
+                    x + carry |> Lib.quotientModBy base
             in
             subHelper restXsLE [] newCarry (z :: zsBE)
 
         ([], y :: restYsLE) ->
             let
                 (newCarry, z) =
-                    carry - y |> quotientModBy base
+                    carry - y |> Lib.quotientModBy base
             in
             subHelper [] restYsLE newCarry (z :: zsBE)
 
         (x :: restXsLE, y :: restYsLE) ->
             let
                 (newCarry, z) =
-                    x - y + carry |> quotientModBy base
+                    x - y + carry |> Lib.quotientModBy base
             in
             subHelper restXsLE restYsLE newCarry (z :: zsBE)
 
@@ -519,7 +520,7 @@ toInt (Natural digitsLE) =
         _ ->
             let
                 (q, r) =
-                    divModBy numBits maxBits
+                    Lib.divModBy numBits maxBits
 
                 (len, maskStart) =
                     if r > 0 then
@@ -536,7 +537,7 @@ toInt (Natural digitsLE) =
             digitsLE
                 |> List.take len
                 |> List.reverse
-                |> padLeft len 0
+                |> Lib.padLeft len 0
                 |> toIntHelper maskStart 0
 
 
@@ -646,7 +647,7 @@ sdAdd xs y zs =
         x :: restXs ->
             let
                 (carry, z) =
-                    divModBy base (x + y)
+                    Lib.divModBy base (x + y)
             in
             sdAdd restXs carry (z :: zs)
 
@@ -666,7 +667,7 @@ sdSub xs y zs =
     case xs of
         [] ->
             zs
-                |> removeLeadingZeros
+                |> Lib.removeLeadingZeros
                 |> List.reverse
 
         x :: restXs ->
@@ -733,7 +734,7 @@ sdMul xs y carry zs =
                     x * y + carry
 
                 (newCarry, z) =
-                    divModBy base product
+                    Lib.divModBy base product
             in
             sdMul restXs y newCarry (z :: zs)
 
@@ -783,46 +784,10 @@ sdDivModHelper xs y isTrailingZero qs r =
                     r * base + x
 
                 (q, newR) =
-                    divModBy y value
+                    Lib.divModBy y value
             in
             if isTrailingZero && q == 0 then
                 sdDivModHelper restXs y isTrailingZero qs newR
 
             else
                 sdDivModHelper restXs y False (q :: qs) newR
-
-
--- HELPERS
-
-
-divModBy : Int -> Int -> (Int, Int)
-divModBy divisor dividend =
-    ( dividend // divisor
-    , modBy divisor dividend
-    )
-
-
-padLeft : Int -> a -> List a -> List a
-padLeft n x list =
-    List.repeat (n - List.length list) x ++ list
-
-
-quotientModBy : Int -> Int -> (Int, Int)
-quotientModBy divisor dividend =
-    ( floor (toFloat dividend / toFloat divisor)
-    , modBy divisor dividend
-    )
-
-
-removeLeadingZeros : List Int -> List Int
-removeLeadingZeros digits =
-    case digits of
-        [] ->
-            []
-
-        d :: restDigits ->
-            if d == 0 then
-                removeLeadingZeros restDigits
-
-            else
-                digits
