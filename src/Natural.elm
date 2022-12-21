@@ -8,7 +8,7 @@ module Natural exposing
     , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
     , max, min
     , isZero, isNonZero
-    , add, sub, mul
+    , add, sub, mul, divModBy
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
     , toBaseBString
@@ -506,6 +506,59 @@ mulHelper xsLE ysBE zsLE =
                     addHelper augend addend 0 []
             in
             mulHelper xsLE restYsBE partialSum
+
+
+divModBy : Natural -> Natural -> Maybe (Natural, Natural)
+divModBy (Natural ysLE as y) (Natural xsLE as x) =
+    case ysLE of
+        [] ->
+            Nothing
+
+        [d] ->
+            let
+                (qs, r) =
+                    sdDivMod xsLE d [] 0
+            in
+            Just
+                ( Natural qs
+                , if r == 0 then
+                    zero
+
+                  else
+                    Natural [r]
+                )
+
+        _ ->
+            case compare x y of
+                LT ->
+                    Just (zero, x)
+
+                EQ ->
+                    Just (one, zero)
+
+                GT ->
+                    let
+                        twoY =
+                            Natural <| sdMul ysLE 2 0 []
+                    in
+                    x
+                        |> divModBy twoY
+                        |> Maybe.map
+                            (\(Natural qsLE, r) ->
+                                let
+                                    twoQsLE =
+                                        sdMul qsLE 2 0 []
+                                in
+                                if r |> isLessThan y then
+                                    ( Natural twoQsLE
+                                    , r
+                                    )
+
+                                else
+                                    ( Natural <| sdAdd twoQsLE 1 []
+                                    , sub r y
+                                    )
+                            )
 
 
 -- CONVERT
