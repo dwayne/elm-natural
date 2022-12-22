@@ -8,7 +8,7 @@ module Natural exposing
     , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
     , max, min
     , isZero, isNonZero, isEven, isOdd
-    , add, sub, mul, divModBy
+    , add, sub, mul, divModBy, exp
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
     , toBaseBString
@@ -573,6 +573,34 @@ divModBy (Natural ysLE as y) (Natural xsLE as x) =
                                     , sub r y
                                     )
                             )
+
+
+exp : Natural -> Natural -> Natural
+exp b n =
+    --
+    -- Can we implement a tail-recursive version?
+    --
+    if isZero n then
+        one
+
+    else if isEven n then
+        let
+            (m, _) =
+                -- Can we avoid division? Maybe use a bitwise right shift?
+                -- Can we avoid computing the remainder?
+                n |> divModBy two |> Maybe.withDefault (one, zero)
+
+            power =
+                exp b m
+        in
+        -- Is there a squaring algorithm that's more efficient?
+        mul power power
+
+    else
+        -- Compute b * b^{n - 1}
+        --
+        -- Can we avoid subtracting 1?
+        mul b <| exp b <| sub n one
 
 
 -- CONVERT
