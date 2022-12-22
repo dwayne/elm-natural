@@ -7,7 +7,7 @@ module Natural exposing
     , compare
     , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
     , max, min
-    , isZero, isNonZero
+    , isZero, isNonZero, isEven, isOdd
     , add, sub, mul, divModBy
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
@@ -364,6 +364,21 @@ isZero (Natural digits) =
 isNonZero : Natural -> Bool
 isNonZero =
     not << isZero
+
+
+isEven : Natural -> Bool
+isEven (Natural digitsLE) =
+    case digitsLE of
+        [] ->
+            True
+
+        d :: _ ->
+            modBy 2 d == 0
+
+
+isOdd : Natural -> Bool
+isOdd =
+    not << isEven
 
 
 -- ARITHMETIC
