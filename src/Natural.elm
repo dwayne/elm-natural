@@ -12,9 +12,6 @@ module Natural exposing
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
     , toBaseBString
-
-    -- For testing purposes
-    , sdAdd, sdSub, sdMul, sdDivMod
     )
 
 
