@@ -8,7 +8,7 @@ module Natural exposing
     , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
     , max, min
     , isZero, isOne, isNonZero, isEven, isOdd
-    , add, sub, mul, divModBy, exp
+    , add, sub, mul, divModBy, divBy, modBy, exp
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
     , toBaseBString
@@ -377,7 +377,7 @@ isEven (Natural digitsLE) =
             True
 
         d :: _ ->
-            modBy 2 d == 0
+            Basics.modBy 2 d == 0
 
 
 isOdd : Natural -> Bool
@@ -578,6 +578,18 @@ divModBy (Natural ysLE as y) (Natural xsLE as x) =
                                     , sub r y
                                     )
                             )
+
+
+divBy : Natural -> Natural -> Maybe Natural
+divBy divisor =
+    -- Is there a faster algorithm since we don't care about the remainder?
+    divModBy divisor >> Maybe.map (Tuple.first)
+
+
+modBy : Natural -> Natural -> Maybe Natural
+modBy divisor =
+    -- Is there a faster algorithm since we don't care about the quotient?
+    divModBy divisor >> Maybe.map (Tuple.second)
 
 
 exp : Natural -> Natural -> Natural
@@ -899,14 +911,14 @@ sdDivModHelper xs y isTrailingZero qs r =
 iDivModBy : Int -> Int -> (Int, Int)
 iDivModBy divisor dividend =
     ( dividend // divisor
-    , modBy divisor dividend
+    , Basics.modBy divisor dividend
     )
 
 
 quotientModBy : Int -> Int -> (Int, Int)
 quotientModBy divisor dividend =
     ( floor (toFloat dividend / toFloat divisor)
-    , modBy divisor dividend
+    , Basics.modBy divisor dividend
     )
 
 
