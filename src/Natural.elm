@@ -7,7 +7,7 @@ module Natural exposing
     , compare
     , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
     , max, min
-    , isZero, isNonZero, isEven, isOdd
+    , isZero, isOne, isNonZero, isEven, isOdd
     , add, sub, mul, divModBy, exp
     , toInt
     , toBinaryString, toOctalString, toHexString, toString
@@ -356,8 +356,13 @@ min a b =
 
 
 isZero : Natural -> Bool
-isZero (Natural digits) =
-    digits == []
+isZero =
+    (==) zero
+
+
+isOne : Natural -> Bool
+isOne =
+    (==) one
 
 
 isNonZero : Natural -> Bool
