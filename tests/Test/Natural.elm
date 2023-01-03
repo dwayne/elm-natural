@@ -11,6 +11,7 @@ suite =
     describe "Natural"
         [ intConversionSuite
         , constantsSuite
+        , baseBStringConversionSuite
         ]
 
 
@@ -88,6 +89,35 @@ constantsSuite =
         ]
 
 
+baseBStringConversionSuite : Test
+baseBStringConversionSuite =
+    describe "fromBaseBString / toBaseBString conversion"
+        [ fuzz baseBString "base b string" <|
+            \(b, s) ->
+                Natural.fromBaseBString b s
+                    |> Maybe.andThen (Natural.toBaseBString b)
+                    |> Expect.equal (Just <| toCanonicalBaseBString s)
+        ]
+
+
+toCanonicalBaseBString : String -> String
+toCanonicalBaseBString =
+    removeLeadingZeros >> String.toLower
+
+
+removeLeadingZeros : String -> String
+removeLeadingZeros s =
+    case String.uncons s of
+        Just (_, "") ->
+            s
+
+        Just ('0', t) ->
+            removeLeadingZeros t
+
+        _ ->
+            s
+
+
 -- CUSTOM FUZZERS
 
 
@@ -99,3 +129,37 @@ negativeInt =
 nonNegativeInt : Fuzzer Int
 nonNegativeInt =
     Fuzz.intAtLeast 0
+
+
+-- Generates random base b (2 <= b <= 36) strings of at least 1 character
+-- and at most 100 characters.
+baseBString : Fuzzer (Int, String)
+baseBString =
+    Fuzz.intRange 2 36
+        |> Fuzz.andThen
+            (\b ->
+                Fuzz.listOfLengthBetween 1 100 (baseBChar b)
+                    |> Fuzz.map
+                        (\l ->
+                            (b, String.fromList l)
+                        )
+            )
+
+
+baseBChar : Int -> Fuzzer Char
+baseBChar b =
+    if 2 <= b && b <= 36 then
+        Fuzz.uniformInt (b - 1)
+            |> Fuzz.map
+                (\offset ->
+                    Char.fromCode <|
+                        if offset < 10 then
+                            0x30 + offset
+
+                        else
+                            (if modBy 2 offset == 0 then 0x61 else 0x41) +
+                                offset - 10
+                )
+
+    else
+        Fuzz.invalid "baseBChar: the base must be between 2 and 36 inclusive"
