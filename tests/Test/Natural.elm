@@ -2,8 +2,8 @@ module Test.Natural exposing (suite)
 
 import Expect
 import Fuzz exposing (Fuzzer)
-import Natural
-import Test exposing (Test, describe, fuzz, test)
+import Natural exposing (Natural)
+import Test exposing (Test, describe, fuzz, fuzz2, test)
 
 
 suite : Test
@@ -12,6 +12,7 @@ suite =
         [ intConversionSuite
         , constantsSuite
         , baseBStringConversionSuite
+        , comparisonSuite
         ]
 
 
@@ -100,22 +101,39 @@ baseBStringConversionSuite =
         ]
 
 
-toCanonicalBaseBString : String -> String
-toCanonicalBaseBString =
-    removeLeadingZeros >> String.toLower
+comparisonSuite : Test
+comparisonSuite =
+    describe "compare"
+        [ fuzz2
+            nonNegativeInt
+            nonNegativeInt
+            "comparison as Int equals comparison as Natural" <|
+            \a b ->
+                let
+                    x =
+                        Natural.fromInt a
 
+                    y =
+                        Natural.fromInt b
+                in
+                Just (compare a b)
+                    |> Expect.equal (Maybe.map2 Natural.compare x y)
 
-removeLeadingZeros : String -> String
-removeLeadingZeros s =
-    case String.uncons s of
-        Just (_, "") ->
-            s
+        , fuzz natural "∀ n ∊ ℕ, n == n" <|
+            \n ->
+                Natural.compare n n
+                    |> Expect.equal EQ
 
-        Just ('0', t) ->
-            removeLeadingZeros t
+        , fuzz natural "∀ n ∊ ℕ, n < n + 1" <|
+            \n ->
+                Natural.compare n (Natural.add n Natural.one)
+                    |> Expect.equal LT
 
-        _ ->
-            s
+        , fuzz natural "∀ n ∊ ℕ, n + 1 > n" <|
+            \n ->
+                Natural.compare (Natural.add n Natural.one) n
+                    |> Expect.equal GT
+        ]
 
 
 -- CUSTOM FUZZERS
@@ -163,3 +181,40 @@ baseBChar b =
 
     else
         Fuzz.invalid "baseBChar: the base must be between 2 and 36 inclusive"
+
+
+natural : Fuzzer Natural
+natural =
+    baseBString
+        |> Fuzz.andThen
+            (\(b, s) ->
+                case Natural.fromBaseBString b s of
+                    Just n ->
+                        Fuzz.constant n
+
+                    Nothing ->
+                        -- This should NEVER happen if both baseBString and
+                        -- Natural.fromBaseBString are written correctly.
+                        Fuzz.invalid <| "natural: an unexpected error"
+            )
+
+
+-- HELPERS
+
+
+toCanonicalBaseBString : String -> String
+toCanonicalBaseBString =
+    removeLeadingZeros >> String.toLower
+
+
+removeLeadingZeros : String -> String
+removeLeadingZeros s =
+    case String.uncons s of
+        Just (_, "") ->
+            s
+
+        Just ('0', t) ->
+            removeLeadingZeros t
+
+        _ ->
+            s
