@@ -3,7 +3,7 @@ module Test.Natural exposing (suite)
 import Expect
 import Fuzz exposing (Fuzzer)
 import Natural exposing (Natural)
-import Test exposing (Test, describe, fuzz, fuzz2, test)
+import Test exposing (Test, describe, fuzz, fuzz2, fuzz3, test)
 
 
 suite : Test
@@ -14,6 +14,7 @@ suite =
         , baseBStringConversionSuite
         , comparisonSuite
         , classificationSuite
+        , additionSuite
         ]
 
 
@@ -215,6 +216,29 @@ classificationSuite =
                         )
                             |> Expect.equal (True, True)
             ]
+        ]
+
+
+additionSuite : Test
+additionSuite =
+    describe "addition"
+        [ fuzz natural "0 is the identity" <|
+            \n ->
+                -- n + 0 = n = 0 + n
+                ( Natural.add n Natural.zero
+                , Natural.add Natural.zero n
+                )
+                    |> Expect.equal (n, n)
+        , fuzz2 natural natural "is commutative" <|
+            \a b ->
+                -- a + b = b + a
+                Natural.add a b
+                    |> Expect.equal (Natural.add b a)
+        , fuzz3 natural natural natural "is associative" <|
+            \a b c ->
+                -- (a + b) + c = a + (b + c)
+                Natural.add (Natural.add a b) c
+                    |> Expect.equal (Natural.add a (Natural.add b c))
         ]
 
 
