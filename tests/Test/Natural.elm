@@ -13,6 +13,7 @@ suite =
         , constantsSuite
         , baseBStringConversionSuite
         , comparisonSuite
+        , classificationSuite
         ]
 
 
@@ -136,6 +137,87 @@ comparisonSuite =
         ]
 
 
+classificationSuite : Test
+classificationSuite =
+    describe "predicates"
+        [ describe "isZero"
+            [ fuzz nonNegativeInt "if the Int is 0 then true else false" <|
+                \i ->
+                    let
+                        n =
+                            Natural.fromInt i
+                    in
+                    if i == 0 then
+                        Maybe.map Natural.isZero n
+                            |> Expect.equal (Just True)
+
+                    else
+                        Maybe.map Natural.isZero n
+                            |> Expect.equal (Just False)
+            ]
+        , describe "isOne"
+            [ fuzz nonNegativeInt "if the Int is 1 then true else false" <|
+                \i ->
+                    let
+                        n =
+                            Natural.fromInt i
+                    in
+                    if i == 1 then
+                        Maybe.map Natural.isOne n
+                            |> Expect.equal (Just True)
+
+                    else
+                        Maybe.map Natural.isOne n
+                            |> Expect.equal (Just False)
+            ]
+        , describe "isNonZero"
+            [ fuzz nonNegativeInt "if the Int is 0 then false else true" <|
+                \i ->
+                    let
+                        n =
+                            Natural.fromInt i
+                    in
+                    if i == 0 then
+                        Maybe.map Natural.isNonZero n
+                            |> Expect.equal (Just False)
+
+                    else
+                        Maybe.map Natural.isNonZero n
+                            |> Expect.equal (Just True)
+            ]
+        , describe "isEven / isOdd"
+            [ fuzz
+                nonNegativeInt
+                "if the Int is even/odd then the Natural is even/odd" <|
+                \i ->
+                    let
+                        n =
+                            Natural.fromInt i
+                    in
+                    if isEven i then
+                        Maybe.map Natural.isEven n
+                            |> Expect.equal (Just True)
+
+                    else
+                        Maybe.map Natural.isOdd n
+                            |> Expect.equal (Just True)
+            , fuzz
+                natural
+                "∀ n ∊ ℕ, n is even iff n + 1 is odd" <|
+                \n ->
+                    if Natural.isEven n then
+                        Natural.isOdd (Natural.add n Natural.one)
+                            |> Expect.equal True
+
+                    else
+                        ( Natural.isOdd n
+                        , Natural.isEven (Natural.add n Natural.one)
+                        )
+                            |> Expect.equal (True, True)
+            ]
+        ]
+
+
 -- CUSTOM FUZZERS
 
 
@@ -218,3 +300,8 @@ removeLeadingZeros s =
 
         _ ->
             s
+
+
+isEven : Int -> Bool
+isEven =
+    modBy 2 >> (==) 0
