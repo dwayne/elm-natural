@@ -16,6 +16,7 @@ suite =
         , classificationSuite
         , additionSuite
         , subtractionSuite
+        , multiplicationSuite
         ]
 
 
@@ -268,6 +269,47 @@ subtractionSuite =
                 else
                     -- c = 0
                     c |> Expect.equal Natural.zero
+        ]
+
+
+multiplicationSuite : Test
+multiplicationSuite =
+    describe "multiplication"
+        [ fuzz natural "1 is the identity" <|
+            \n ->
+                -- n * 1 = n = 1 * n
+                ( Natural.mul n Natural.one
+                , Natural.mul Natural.one n
+                )
+                    |> Expect.equal (n, n)
+        , fuzz natural "∀ n ∊ ℕ, n * 0 = 0 = 0 * n" <|
+            \n ->
+                ( Natural.mul n Natural.zero
+                , Natural.mul Natural.zero n
+                )
+                    |> Expect.equal (Natural.zero, Natural.zero)
+        , fuzz2 natural natural "is commutative" <|
+            \a b ->
+                -- a * b = b * a
+                Natural.mul a b
+                    |> Expect.equal (Natural.mul b a)
+        , fuzz3 natural natural natural "is associative" <|
+            \a b c ->
+                -- (a * b) * c = a * (b * c)
+                Natural.mul (Natural.mul a b) c
+                    |> Expect.equal (Natural.mul a (Natural.mul b c))
+        , fuzz3 natural natural natural "left-distributive over addition" <|
+            \a b c ->
+                -- a * (b + c) = a * b + a * c
+                Natural.mul a (Natural.add b c)
+                    |> Expect.equal
+                        (Natural.add (Natural.mul a b) (Natural.mul a c))
+        , fuzz3 natural natural natural "right-distributive over addition" <|
+            \a b c ->
+                -- (b + c) * a = b * a + c * a
+                Natural.mul (Natural.add b c) a
+                    |> Expect.equal
+                        (Natural.add (Natural.mul b a) (Natural.mul c a))
         ]
 
 
