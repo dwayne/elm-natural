@@ -15,6 +15,7 @@ suite =
         , comparisonSuite
         , classificationSuite
         , additionSuite
+        , subtractionSuite
         ]
 
 
@@ -239,6 +240,34 @@ additionSuite =
                 -- (a + b) + c = a + (b + c)
                 Natural.add (Natural.add a b) c
                     |> Expect.equal (Natural.add a (Natural.add b c))
+        ]
+
+
+subtractionSuite : Test
+subtractionSuite =
+    describe "(saturating) subtraction"
+        [ fuzz natural "∀ n ∊ ℕ, n - 0 = n" <|
+            \n ->
+                Natural.sub n Natural.zero
+                    |> Expect.equal n
+        , fuzz natural "∀ n ∊ ℕ, 0 - n = 0" <|
+            \n ->
+                Natural.sub Natural.zero n
+                    |> Expect.equal Natural.zero
+        , fuzz2 natural natural "the definition" <|
+            \a b ->
+                let
+                    c =
+                        Natural.sub a b
+                in
+                if a |> Natural.isGreaterThanOrEqual b then
+                    -- c + b = a
+                    Natural.add c b
+                        |> Expect.equal a
+
+                else
+                    -- c = 0
+                    c |> Expect.equal Natural.zero
         ]
 
 
