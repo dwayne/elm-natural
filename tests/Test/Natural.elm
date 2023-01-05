@@ -255,6 +255,10 @@ subtractionSuite =
             \n ->
                 Natural.sub Natural.zero n
                     |> Expect.equal Natural.zero
+        , fuzz natural "∀ n ∊ ℕ, n - n = 0" <|
+            \n ->
+                Natural.sub n n
+                    |> Expect.equal Natural.zero
         , fuzz2 natural natural "the definition" <|
             \a b ->
                 let
