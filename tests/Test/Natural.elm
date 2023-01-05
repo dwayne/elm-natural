@@ -19,6 +19,7 @@ suite =
         , multiplicationSuite
         , divisionWithRemainderSuite
         , divisionSuite
+        , exponentiationSuite
         ]
 
 
@@ -412,6 +413,96 @@ divisionSuite =
         ]
 
 
+exponentiationSuite : Test
+exponentiationSuite =
+    describe "exponentiation"
+        [ test "0 ^ 0 = 1" <|
+            \_ ->
+                Natural.exp Natural.zero Natural.zero
+                    |> Expect.equal Natural.one
+        , fuzz positiveNatural "∀ a ∊ ℕ+, a ^ 0 = 1" <|
+            \a ->
+                Natural.exp a Natural.zero
+                    |> Expect.equal Natural.one
+        , fuzz natural "∀ a ∊ ℕ, a ^ 1 = a" <|
+            \a ->
+                Natural.exp a Natural.one
+                    |> Expect.equal a
+        , fuzz positiveNatural "∀ n ∊ ℕ+, 0 ^ n = 0" <|
+            \n ->
+                Natural.exp Natural.zero n
+                    |> Expect.equal Natural.zero
+        , fuzz3
+            baseNatural
+            exponentNatural
+            exponentNatural
+            "product of powers (same base)" <|
+            \a m n ->
+                -- a^m * a^n = a^{m+n}
+                let
+                    lhs =
+                        Natural.mul (Natural.exp a m) (Natural.exp a n)
+
+                    rhs =
+                        Natural.exp a (Natural.add m n)
+                in
+                lhs |> Expect.equal rhs
+        , fuzz3
+            baseNatural
+            baseNatural
+            exponentNatural
+            "product of powers (same exponent)" <|
+            \a b n ->
+                -- a^n * b^n = (a * b)^n
+                let
+                    lhs =
+                        Natural.mul (Natural.exp a n) (Natural.exp b n)
+
+                    rhs =
+                        Natural.exp (Natural.mul a b) n
+                in
+                lhs |> Expect.equal rhs
+        , fuzz3
+            basePositiveNatural
+            exponentNatural
+            exponentNatural
+            "quotient of powers (same base)" <|
+            \a m n ->
+                -- a^m / a^n = a^{m-n}
+                let
+                    lhs =
+                        Natural.exp a m |> Natural.divBy (Natural.exp a n)
+                in
+                if m |> Natural.isGreaterThanOrEqual n then
+                    let
+                        rhs =
+                            Just <| Natural.exp a (Natural.sub m n)
+                    in
+                    lhs |> Expect.equal rhs
+
+                else if a == Natural.one then
+                    lhs |> Expect.equal (Just Natural.one)
+
+                else
+                    lhs |> Expect.equal (Just Natural.zero)
+        , fuzz3
+            baseNatural
+            exponentNatural
+            exponentNatural
+            "power of powers" <|
+            \a m n ->
+                -- (a^m)^n = a^{m*n}
+                let
+                    lhs =
+                        Natural.exp (Natural.exp a m) n
+
+                    rhs =
+                        Natural.exp a (Natural.mul m n)
+                in
+                lhs |> Expect.equal rhs
+        ]
+
+
 -- CUSTOM FUZZERS
 
 
@@ -478,6 +569,53 @@ natural =
 positiveNatural : Fuzzer Natural
 positiveNatural =
     Fuzz.map (Natural.add Natural.one) natural
+
+
+-- Returns a reasonably sized natural number for the base of an exponentiation.
+baseNatural : Fuzzer Natural
+baseNatural =
+    Fuzz.uniformInt 100
+        |> Fuzz.andThen
+            (\i ->
+                case Natural.fromInt i of
+                    Just n ->
+                        Fuzz.constant n
+
+                    Nothing ->
+                        -- This should NEVER happen.
+                        Fuzz.invalid <| "baseNatural: an unexpected error"
+            )
+
+
+basePositiveNatural : Fuzzer Natural
+basePositiveNatural =
+    baseNatural
+        |> Fuzz.andThen
+            (\n ->
+                Fuzz.constant <|
+                    if Natural.isZero n then
+                        Natural.one
+
+                    else
+                        n
+            )
+
+
+-- Returns a reasonably sized natural number for the exponent (power) of an
+-- exponentiation.
+exponentNatural : Fuzzer Natural
+exponentNatural =
+    Fuzz.uniformInt 50
+        |> Fuzz.andThen
+            (\i ->
+                case Natural.fromInt i of
+                    Just n ->
+                        Fuzz.constant n
+
+                    Nothing ->
+                        -- This should NEVER happen.
+                        Fuzz.invalid <| "exponentNatural: an unexpected error"
+            )
 
 
 -- HELPERS
