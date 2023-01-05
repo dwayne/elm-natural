@@ -17,6 +17,8 @@ suite =
         , additionSuite
         , subtractionSuite
         , multiplicationSuite
+        , divisionWithRemainderSuite
+        , divisionSuite
         ]
 
 
@@ -317,6 +319,99 @@ multiplicationSuite =
         ]
 
 
+divisionWithRemainderSuite : Test
+divisionWithRemainderSuite =
+    describe "division with remainder"
+        [ fuzz2 natural natural "the definition" <|
+            \a b ->
+                case a |> Natural.divModBy b of
+                    Just (q, r) ->
+                        if a |> Natural.isLessThan b then
+                            (q, r)
+                                |> Expect.equal (Natural.zero, a)
+
+                        else if a == b then
+                            (q, r)
+                                |> Expect.equal (Natural.one, Natural.zero)
+
+                        else
+                            -- q * b + r = a
+                            Natural.add (Natural.mul q b) r
+                                |> Expect.equal a
+
+                    Nothing ->
+                        b |> Expect.equal Natural.zero
+        , fuzz natural "by 0 is undefined" <|
+            \n ->
+                n
+                    |> Natural.divModBy Natural.zero
+                    |> Expect.equal Nothing
+        , fuzz natural "by 1" <|
+            \n ->
+                n
+                    |> Natural.divModBy Natural.one
+                    |> Expect.equal (Just (n, Natural.zero))
+        , fuzz natural "by 2 and isEven / isOdd relation" <|
+            \n ->
+                case n |> Natural.divModBy Natural.two of
+                    Just (_, r) ->
+                        if r == Natural.zero then
+                            Natural.isEven n
+                                |> Expect.equal True
+
+                        else
+                            (r, Natural.isOdd n)
+                                |> Expect.equal (Natural.one, True)
+
+                    Nothing ->
+                        Expect.fail "division by 2 is NEVER undefined"
+        ]
+
+
+divisionSuite : Test
+divisionSuite =
+    describe "division"
+        [ fuzz3
+            positiveNatural
+            natural
+            positiveNatural
+            "cancel common factor" <|
+            \a b c ->
+                -- (a * b) / (a * c) = b / c
+                let
+                    lhs =
+                        Natural.mul a b |> Natural.divBy (Natural.mul a c)
+
+                    rhs =
+                        b |> Natural.divBy c
+                in
+                lhs |> Expect.equal rhs
+        --
+        -- , fuzz3 natural natural natural "distributes over addition" <|
+        --     \a b c ->
+        --         -- (a + b) / c = a / c + b / c
+        --         let
+        --             lhs =
+        --                 Natural.add a b |> Natural.divBy c
+        --
+        --             x =
+        --                 a |> Natural.divBy c
+        --
+        --             y =
+        --                 b |> Natural.divBy c
+        --
+        --             rhs =
+        --                 Maybe.map2 Natural.add x y
+        --         in
+        --         lhs |> Expect.equal rhs
+        --
+        -- This is not true in general for division over the natural numbers.
+        --
+        -- For e.g. try a = 1, b = 1, and c = 2.
+        --
+        ]
+
+
 -- CUSTOM FUZZERS
 
 
@@ -378,6 +473,11 @@ natural =
                         -- Natural.fromBaseBString are written correctly.
                         Fuzz.invalid <| "natural: an unexpected error"
             )
+
+
+positiveNatural : Fuzzer Natural
+positiveNatural =
+    Fuzz.map (Natural.add Natural.one) natural
 
 
 -- HELPERS
