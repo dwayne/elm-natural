@@ -20,14 +20,12 @@ benchmarks =
 exponentiationBenchmarks : Benchmark
 exponentiationBenchmarks =
     describe "exponentiation"
-        [ benchmark "2 ^ 1000" <|
-            \_ ->
+        [ let
+            oneThousand =
                 Natural.fromInt 1000
-                    |> Maybe.map (Natural.exp Natural.two)
-        --
-        -- This benchmark really slows things down.
-        -- , benchmark "2 ^ 10000" <|
-        --     \_ ->
-        --         Natural.fromInt 10000
-        --             |> Maybe.map (Natural.exp Natural.two)
+                    |> Maybe.withDefault Natural.zero
+          in
+          benchmark "2 ^ 1000" <|
+              \_ ->
+                  Natural.exp Natural.two oneThousand
         ]
