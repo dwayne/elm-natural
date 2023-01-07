@@ -14,6 +14,7 @@ benchmarks : Benchmark
 benchmarks =
     describe "Natural"
         [ multiplicationBenchmarks
+        , divisionWithRemainderBenchmarks
         , exponentiationBenchmarks
         ]
 
@@ -28,6 +29,22 @@ multiplicationBenchmarks =
           benchmark "999..9 (100 9's) * 999..9 (100 9's)" <|
               \_ ->
                   Natural.mul oneHundredNines oneHundredNines
+        ]
+
+
+divisionWithRemainderBenchmarks : Benchmark
+divisionWithRemainderBenchmarks =
+    describe "division with remainder"
+        [ let
+            oneHundredNines =
+                nines 100
+
+            oneHundredNinesSquared =
+                Natural.mul oneHundredNines oneHundredNines
+          in
+          benchmark "(999..9 (100 9's))^2 / 999..9 (100 9's)" <|
+              \_ ->
+                  oneHundredNinesSquared |> Natural.divModBy oneHundredNines
         ]
 
 
