@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Benchmark exposing (Benchmark, benchmark, describe)
 import Benchmark.Runner as BR
-import Natural
+import Natural exposing (Natural)
 
 
 main : BR.BenchmarkProgram
@@ -13,7 +13,21 @@ main =
 benchmarks : Benchmark
 benchmarks =
     describe "Natural"
-        [ exponentiationBenchmarks
+        [ multiplicationBenchmarks
+        , exponentiationBenchmarks
+        ]
+
+
+multiplicationBenchmarks : Benchmark
+multiplicationBenchmarks =
+    describe "multiplication"
+        [ let
+            oneHundredNines =
+                nines 100
+          in
+          benchmark "999..9 (100 9's) * 999..9 (100 9's)" <|
+              \_ ->
+                  Natural.mul oneHundredNines oneHundredNines
         ]
 
 
@@ -29,3 +43,16 @@ exponentiationBenchmarks =
               \_ ->
                   Natural.exp Natural.two oneThousand
         ]
+
+
+-- HELPERS
+
+
+-- If n >= 1 then return a natural number consisting of n 9's.
+-- Otherwise, it returns 0.
+nines : Int -> Natural
+nines n =
+    List.repeat n '9'
+        |> String.fromList
+        |> Natural.fromString
+        |> Maybe.withDefault Natural.zero
