@@ -545,36 +545,52 @@ divModBy (Natural ysLE as y) (Natural xsLE as x) =
                 )
 
         _ ->
-            case compare x y of
-                LT ->
-                    Just (zero, x)
+            Just <| divModHelper x y DivModEnd
 
-                EQ ->
-                    Just (one, zero)
 
-                GT ->
-                    let
-                        twoY =
-                            Natural <| sdMul ysLE 2 0 []
-                    in
-                    x
-                        |> divModBy twoY
-                        |> Maybe.map
-                            (\(Natural qsLE, r) ->
-                                let
-                                    twoQsLE =
-                                        sdMul qsLE 2 0 []
-                                in
-                                if r |> isLessThan y then
-                                    ( Natural twoQsLE
-                                    , r
-                                    )
+divModHelper : Natural -> Natural -> DivModCont -> (Natural, Natural)
+divModHelper (Natural xsLE as x) (Natural ysLE as y) cont =
+    case compare x y of
+        LT ->
+            applyDivModCont cont (zero, x)
 
-                                else
-                                    ( Natural <| sdAdd twoQsLE 1 []
-                                    , sub r y
-                                    )
-                            )
+        EQ ->
+            applyDivModCont cont (one, zero)
+
+        GT ->
+            let
+                twoY =
+                    Natural <| sdMul ysLE 2 0 []
+            in
+            divModHelper x twoY (DivMod1Cont y cont)
+
+
+type DivModCont
+    = DivModEnd
+    | DivMod1Cont Natural DivModCont
+
+
+applyDivModCont : DivModCont -> (Natural, Natural) -> (Natural, Natural)
+applyDivModCont cont (Natural qsLE as q, r) =
+    case cont of
+        DivModEnd ->
+            (q, r)
+
+        DivMod1Cont y nextCont ->
+            let
+                twoQsLE =
+                    sdMul qsLE 2 0 []
+            in
+            applyDivModCont nextCont <|
+                if r |> isLessThan y then
+                    ( Natural twoQsLE
+                    , r
+                    )
+
+                else
+                    ( Natural <| sdAdd twoQsLE 1 []
+                    , sub r y
+                    )
 
 
 divBy : Natural -> Natural -> Maybe Natural
