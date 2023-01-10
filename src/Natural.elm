@@ -591,30 +591,36 @@ modBy divisor =
 
 exp : Natural -> Natural -> Natural
 exp b n =
-    --
-    -- Can we implement a tail-recursive version?
-    --
     if isZero n then
         one
 
-    else if isEven n then
-        let
-            (m, _) =
-                -- Can we avoid division? Maybe use a bitwise right shift?
-                -- Can we avoid computing the remainder?
-                n |> divModBy two |> Maybe.withDefault (one, zero)
-
-            power =
-                exp b m
-        in
-        -- Is there a squaring algorithm that's more efficient?
-        mul power power
+    else if isZero b then
+        zero
 
     else
-        -- Compute b * b^{n - 1}
-        --
-        -- Can we avoid subtracting 1?
-        mul b <| exp b <| sub n one
+        expHelper b n one
+
+
+expHelper : Natural -> Natural -> Natural -> Natural
+expHelper b n y =
+    if isZero n then
+        y
+
+    else
+        let
+            (q, r) =
+                n |> divModBy two |> Maybe.withDefault (one, zero)
+
+            bSquared =
+                mul b b
+        in
+        if r == zero then
+            -- n is even
+            expHelper bSquared q y
+
+        else
+            -- n is odd
+            expHelper bSquared q (mul y b)
 
 
 -- CONVERT
