@@ -545,29 +545,10 @@ divModBy (Natural ysLE as y) (Natural xsLE as x) =
                 )
 
         _ ->
-            Just <| trampoline <| divModHelper x y Return
+            Just <| divModHelper x y identity
 
 
-type Bounce a
-    = Return a
-    | Suspend (() -> Bounce a)
-
-
-trampoline : Bounce a -> a
-trampoline bounce =
-    case bounce of
-        Return v ->
-            v
-
-        Suspend thunk ->
-            let
-                nextBounce =
-                    thunk ()
-            in
-            trampoline nextBounce
-
-
-divModHelper : Natural -> Natural -> ((Natural, Natural) -> Bounce (Natural, Natural)) -> Bounce (Natural, Natural)
+divModHelper : Natural -> Natural -> ((Natural, Natural) -> (Natural, Natural)) -> (Natural, Natural)
 divModHelper (Natural xsLE as x) (Natural ysLE as y) cont =
     case compare x y of
         LT ->
@@ -585,19 +566,22 @@ divModHelper (Natural xsLE as x) (Natural ysLE as y) cont =
                     let
                         twoQsLE =
                             sdMul qsLE 2 0 []
-                    in
-                    cont <|
-                        if r |> isLessThan y then
-                            ( Natural twoQsLE
-                            , r
-                            )
 
-                        else
-                            ( Natural <| sdAdd twoQsLE 1 []
-                            , sub r y
-                            )
+                        result =
+                            if r |> isLessThan y then
+                                ( Natural twoQsLE
+                                , r
+                                )
+
+                            else
+                                ( Natural <| sdAdd twoQsLE 1 []
+                                , sub r y
+                                )
+                    in
+                    cont result
+
             in
-            Suspend (\_ -> divModHelper x twoY nextCont)
+            divModHelper x twoY nextCont
 
 
 divBy : Natural -> Natural -> Maybe Natural
