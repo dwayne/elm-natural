@@ -545,10 +545,29 @@ divModBy (Natural ysLE as y) (Natural xsLE as x) =
                 )
 
         _ ->
-            Just <| divModHelper x y DivModEnd
+            Just <| trampoline <| divModHelper x y DivModEnd
 
 
-divModHelper : Natural -> Natural -> DivModCont -> (Natural, Natural)
+type Bounce a
+    = Return a
+    | Suspend (() -> Bounce a)
+
+
+trampoline : Bounce a -> a
+trampoline bounce =
+    case bounce of
+        Return v ->
+            v
+
+        Suspend thunk ->
+            let
+                nextBounce =
+                    thunk ()
+            in
+            trampoline nextBounce
+
+
+divModHelper : Natural -> Natural -> DivModCont -> Bounce (Natural, Natural)
 divModHelper (Natural xsLE as x) (Natural ysLE as y) cont =
     case compare x y of
         LT ->
@@ -562,7 +581,7 @@ divModHelper (Natural xsLE as x) (Natural ysLE as y) cont =
                 twoY =
                     Natural <| sdMul ysLE 2 0 []
             in
-            divModHelper x twoY (DivMod1Cont y cont)
+            Suspend (\_ -> divModHelper x twoY (DivMod1Cont y cont))
 
 
 type DivModCont
@@ -570,11 +589,11 @@ type DivModCont
     | DivMod1Cont Natural DivModCont
 
 
-applyDivModCont : DivModCont -> (Natural, Natural) -> (Natural, Natural)
+applyDivModCont : DivModCont -> (Natural, Natural) -> Bounce (Natural, Natural)
 applyDivModCont cont (Natural qsLE as q, r) =
     case cont of
         DivModEnd ->
-            (q, r)
+            Return (q, r)
 
         DivMod1Cont y nextCont ->
             let
