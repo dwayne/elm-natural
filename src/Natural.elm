@@ -545,7 +545,7 @@ divModBy (Natural ysLE as y) (Natural xsLE as x) =
                 )
 
         _ ->
-            Just <| trampoline <| divModHelper x y DivModEnd
+            Just <| trampoline <| divModHelper x y Return
 
 
 type Bounce a
@@ -567,49 +567,37 @@ trampoline bounce =
             trampoline nextBounce
 
 
-divModHelper : Natural -> Natural -> DivModCont -> Bounce (Natural, Natural)
+divModHelper : Natural -> Natural -> ((Natural, Natural) -> Bounce (Natural, Natural)) -> Bounce (Natural, Natural)
 divModHelper (Natural xsLE as x) (Natural ysLE as y) cont =
     case compare x y of
         LT ->
-            applyDivModCont cont (zero, x)
+            cont (zero, x)
 
         EQ ->
-            applyDivModCont cont (one, zero)
+            cont (one, zero)
 
         GT ->
             let
                 twoY =
                     Natural <| sdMul ysLE 2 0 []
+
+                nextCont (Natural qsLE as q, r) =
+                    let
+                        twoQsLE =
+                            sdMul qsLE 2 0 []
+                    in
+                    cont <|
+                        if r |> isLessThan y then
+                            ( Natural twoQsLE
+                            , r
+                            )
+
+                        else
+                            ( Natural <| sdAdd twoQsLE 1 []
+                            , sub r y
+                            )
             in
-            Suspend (\_ -> divModHelper x twoY (DivMod1Cont y cont))
-
-
-type DivModCont
-    = DivModEnd
-    | DivMod1Cont Natural DivModCont
-
-
-applyDivModCont : DivModCont -> (Natural, Natural) -> Bounce (Natural, Natural)
-applyDivModCont cont (Natural qsLE as q, r) =
-    case cont of
-        DivModEnd ->
-            Return (q, r)
-
-        DivMod1Cont y nextCont ->
-            let
-                twoQsLE =
-                    sdMul qsLE 2 0 []
-            in
-            applyDivModCont nextCont <|
-                if r |> isLessThan y then
-                    ( Natural twoQsLE
-                    , r
-                    )
-
-                else
-                    ( Natural <| sdAdd twoQsLE 1 []
-                    , sub r y
-                    )
+            Suspend (\_ -> divModHelper x twoY nextCont)
 
 
 divBy : Natural -> Natural -> Maybe Natural
