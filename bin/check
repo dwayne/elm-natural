@@ -13,6 +13,10 @@ if ! $(cd "$project" && elm-test &>/dev/null); then
   fail "One or more tests failed. Run: elm-test"
 fi
 
+for main in $(echo "$project/src/*.elm" "$project/examples/src/*.elm"); do
+  cd "${main%/src/*.elm}" && elm make "$main" --output=/dev/null || exit 1
+done >/dev/null
+
 if ! review &>/dev/null; then
   fail "One or more reviews failed. Run: review"
 fi

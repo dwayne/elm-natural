@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+cd "$project/examples" && elm reactor "$@"

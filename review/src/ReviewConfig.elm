@@ -59,7 +59,9 @@ config =
     , NoUnused.Dependencies.rule
     , NoUnused.Exports.rule
         |> Rule.ignoreErrorsForFiles
-            [ "benchmarks/Main.elm" ]
+            [ "benchmarks/Main.elm"
+            , "examples/src/Factorial.elm"
+            ]
     , NoUnused.Parameters.rule
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule
