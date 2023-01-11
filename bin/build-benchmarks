@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cd "$project/benchmarks" && \
+  elm make Main.elm --output index.html --optimize
