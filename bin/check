@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+fail () {
+  echo "$1" >&2
+  exit 1
+}
+
+if ! format --validate &>/dev/null; then
+  fail "Your code needs to be formatted. Run: format"
+fi
+
+if ! $(cd "$project" && elm-test &>/dev/null); then
+  fail "One or more tests failed. Run: elm-test"
+fi
+
+if ! review &>/dev/null; then
+  fail "One or more reviews failed. Run: review"
+fi
