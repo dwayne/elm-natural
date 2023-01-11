@@ -101,7 +101,7 @@ baseBStringConversionSuite : Test
 baseBStringConversionSuite =
     describe "fromBaseBString / toBaseBString conversion"
         [ fuzz baseBString "base b string" <|
-            \(b, s) ->
+            \( b, s ) ->
                 Natural.fromBaseBString b s
                     |> Maybe.andThen (Natural.toBaseBString b)
                     |> Expect.equal (Just <| toCanonicalBaseBString s)
@@ -114,7 +114,8 @@ comparisonSuite =
         [ fuzz2
             nonNegativeInt
             nonNegativeInt
-            "comparison as Int equals comparison as Natural" <|
+            "comparison as Int equals comparison as Natural"
+          <|
             \a b ->
                 let
                     x =
@@ -125,17 +126,14 @@ comparisonSuite =
                 in
                 Just (compare a b)
                     |> Expect.equal (Maybe.map2 Natural.compare x y)
-
         , fuzz natural "∀ n ∊ ℕ, n == n" <|
             \n ->
                 Natural.compare n n
                     |> Expect.equal EQ
-
         , fuzz natural "∀ n ∊ ℕ, n < n + 1" <|
             \n ->
                 Natural.compare n (Natural.add n Natural.one)
                     |> Expect.equal LT
-
         , fuzz natural "∀ n ∊ ℕ, n + 1 > n" <|
             \n ->
                 Natural.compare (Natural.add n Natural.one) n
@@ -194,7 +192,8 @@ classificationSuite =
         , describe "isEven / isOdd"
             [ fuzz
                 nonNegativeInt
-                "if the Int is even/odd then the Natural is even/odd" <|
+                "if the Int is even/odd then the Natural is even/odd"
+              <|
                 \i ->
                     let
                         n =
@@ -209,7 +208,8 @@ classificationSuite =
                             |> Expect.equal (Just True)
             , fuzz
                 natural
-                "∀ n ∊ ℕ, n is even iff n + 1 is odd" <|
+                "∀ n ∊ ℕ, n is even iff n + 1 is odd"
+              <|
                 \n ->
                     if Natural.isEven n then
                         Natural.isOdd (Natural.add n Natural.one)
@@ -219,7 +219,7 @@ classificationSuite =
                         ( Natural.isOdd n
                         , Natural.isEven (Natural.add n Natural.one)
                         )
-                            |> Expect.equal (True, True)
+                            |> Expect.equal ( True, True )
             ]
         ]
 
@@ -233,7 +233,7 @@ additionSuite =
                 ( Natural.add n Natural.zero
                 , Natural.add Natural.zero n
                 )
-                    |> Expect.equal (n, n)
+                    |> Expect.equal ( n, n )
         , fuzz2 natural natural "is commutative" <|
             \a b ->
                 -- a + b = b + a
@@ -288,13 +288,13 @@ multiplicationSuite =
                 ( Natural.mul n Natural.one
                 , Natural.mul Natural.one n
                 )
-                    |> Expect.equal (n, n)
+                    |> Expect.equal ( n, n )
         , fuzz natural "∀ n ∊ ℕ, n * 0 = 0 = 0 * n" <|
             \n ->
                 ( Natural.mul n Natural.zero
                 , Natural.mul Natural.zero n
                 )
-                    |> Expect.equal (Natural.zero, Natural.zero)
+                    |> Expect.equal ( Natural.zero, Natural.zero )
         , fuzz2 natural natural "is commutative" <|
             \a b ->
                 -- a * b = b * a
@@ -326,14 +326,14 @@ divisionWithRemainderSuite =
         [ fuzz2 natural natural "the definition" <|
             \a b ->
                 case a |> Natural.divModBy b of
-                    Just (q, r) ->
+                    Just ( q, r ) ->
                         if a |> Natural.isLessThan b then
-                            (q, r)
-                                |> Expect.equal (Natural.zero, a)
+                            ( q, r )
+                                |> Expect.equal ( Natural.zero, a )
 
                         else if a == b then
-                            (q, r)
-                                |> Expect.equal (Natural.one, Natural.zero)
+                            ( q, r )
+                                |> Expect.equal ( Natural.one, Natural.zero )
 
                         else
                             -- q * b + r = a
@@ -351,18 +351,18 @@ divisionWithRemainderSuite =
             \n ->
                 n
                     |> Natural.divModBy Natural.one
-                    |> Expect.equal (Just (n, Natural.zero))
+                    |> Expect.equal (Just ( n, Natural.zero ))
         , fuzz natural "by 2 and isEven / isOdd relation" <|
             \n ->
                 case n |> Natural.divModBy Natural.two of
-                    Just (_, r) ->
+                    Just ( _, r ) ->
                         if r == Natural.zero then
                             Natural.isEven n
                                 |> Expect.equal True
 
                         else
-                            (r, Natural.isOdd n)
-                                |> Expect.equal (Natural.one, True)
+                            ( r, Natural.isOdd n )
+                                |> Expect.equal ( Natural.one, True )
 
                     Nothing ->
                         Expect.fail "division by 2 is NEVER undefined"
@@ -376,7 +376,8 @@ divisionSuite =
             positiveNatural
             natural
             positiveNatural
-            "cancel common factor" <|
+            "cancel common factor"
+          <|
             \a b c ->
                 -- (a * b) / (a * c) = b / c
                 let
@@ -387,6 +388,7 @@ divisionSuite =
                         b |> Natural.divBy c
                 in
                 lhs |> Expect.equal rhs
+
         --
         -- , fuzz3 natural natural natural "distributes over addition" <|
         --     \a b c ->
@@ -436,7 +438,8 @@ exponentiationSuite =
             baseNatural
             exponentNatural
             exponentNatural
-            "product of powers (same base)" <|
+            "product of powers (same base)"
+          <|
             \a m n ->
                 -- a^m * a^n = a^{m+n}
                 let
@@ -451,7 +454,8 @@ exponentiationSuite =
             baseNatural
             baseNatural
             exponentNatural
-            "product of powers (same exponent)" <|
+            "product of powers (same exponent)"
+          <|
             \a b n ->
                 -- a^n * b^n = (a * b)^n
                 let
@@ -466,7 +470,8 @@ exponentiationSuite =
             basePositiveNatural
             exponentNatural
             exponentNatural
-            "quotient of powers (same base)" <|
+            "quotient of powers (same base)"
+          <|
             \a m n ->
                 -- a^m / a^n = a^{m-n}
                 let
@@ -489,7 +494,8 @@ exponentiationSuite =
             baseNatural
             exponentNatural
             exponentNatural
-            "power of powers" <|
+            "power of powers"
+          <|
             \a m n ->
                 -- (a^m)^n = a^{m*n}
                 let
@@ -501,6 +507,7 @@ exponentiationSuite =
                 in
                 lhs |> Expect.equal rhs
         ]
+
 
 
 -- CUSTOM FUZZERS
@@ -516,9 +523,12 @@ nonNegativeInt =
     Fuzz.intAtLeast 0
 
 
+
 -- Generates random base b (2 <= b <= 36) strings of at least 1 character
 -- and at most 100 characters.
-baseBString : Fuzzer (Int, String)
+
+
+baseBString : Fuzzer ( Int, String )
 baseBString =
     Fuzz.intRange 2 36
         |> Fuzz.andThen
@@ -526,7 +536,7 @@ baseBString =
                 Fuzz.listOfLengthBetween 1 100 (baseBChar b)
                     |> Fuzz.map
                         (\l ->
-                            (b, String.fromList l)
+                            ( b, String.fromList l )
                         )
             )
 
@@ -542,8 +552,14 @@ baseBChar b =
                             0x30 + offset
 
                         else
-                            (if modBy 2 offset == 0 then 0x61 else 0x41) +
-                                offset - 10
+                            (if modBy 2 offset == 0 then
+                                0x61
+
+                             else
+                                0x41
+                            )
+                                + offset
+                                - 10
                 )
 
     else
@@ -554,7 +570,7 @@ natural : Fuzzer Natural
 natural =
     baseBString
         |> Fuzz.andThen
-            (\(b, s) ->
+            (\( b, s ) ->
                 case Natural.fromBaseBString b s of
                     Just n ->
                         Fuzz.constant n
@@ -571,7 +587,10 @@ positiveNatural =
     Fuzz.map (Natural.add Natural.one) natural
 
 
+
 -- Returns a reasonably sized natural number for the base of an exponentiation.
+
+
 baseNatural : Fuzzer Natural
 baseNatural =
     Fuzz.uniformInt 100
@@ -601,8 +620,11 @@ basePositiveNatural =
             )
 
 
+
 -- Returns a reasonably sized natural number for the exponent (power) of an
 -- exponentiation.
+
+
 exponentNatural : Fuzzer Natural
 exponentNatural =
     Fuzz.uniformInt 50
@@ -618,6 +640,7 @@ exponentNatural =
             )
 
 
+
 -- HELPERS
 
 
@@ -629,10 +652,10 @@ toCanonicalBaseBString =
 removeLeadingZeros : String -> String
 removeLeadingZeros s =
     case String.uncons s of
-        Just (_, "") ->
+        Just ( _, "" ) ->
             s
 
-        Just ('0', t) ->
+        Just ( '0', t ) ->
             removeLeadingZeros t
 
         _ ->

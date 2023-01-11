@@ -1,21 +1,51 @@
 module Natural exposing
     ( Natural
-    , zero, one, two, three, four, five, six, seven, eight, nine, ten
-    , fromInt
-    , fromBinaryString, fromOctalString, fromHexString, fromString
-    , fromBaseBString
+    , add
     , compare
-    , isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual
-    , max, min
-    , isZero, isOne, isNonZero, isEven, isOdd
-    , add, sub, mul, divModBy, divBy, modBy, exp
-    , toInt
-    , toBinaryString, toOctalString, toHexString, toString
+    , divBy
+    , divModBy
+    , eight
+    , exp
+    , five
+    , four
+    , fromBaseBString
+    , fromBinaryString
+    , fromHexString
+    , fromInt
+    , fromOctalString
+    , fromString
+    , isEven
+    , isGreaterThan
+    , isGreaterThanOrEqual
+    , isLessThan
+    , isLessThanOrEqual
+    , isNonZero
+    , isOdd
+    , isOne
+    , isZero
+    , max
+    , min
+    , modBy
+    , mul
+    , nine
+    , one
+    , seven
+    , six
+    , sub
+    , ten
+    , three
     , toBaseBString
+    , toBinaryString
+    , toHexString
+    , toInt
+    , toOctalString
+    , toString
+    , two
+    , zero
     )
 
-
 import Bitwise
+
 
 
 -- REPRESENTATION
@@ -40,7 +70,8 @@ baseMask =
     base - 1
 
 
-type Natural
+type
+    Natural
     -- x = x_{n-1} * base^{n-1} + ... + x_2 * base^2 + x_1 * base + x_0
     --
     -- is represented as
@@ -55,6 +86,7 @@ type Natural
     = Natural (List Int)
 
 
+
 -- CONSTANTS
 
 
@@ -65,52 +97,53 @@ zero =
 
 one : Natural
 one =
-    Natural [1]
+    Natural [ 1 ]
 
 
 two : Natural
 two =
-    Natural [2]
+    Natural [ 2 ]
 
 
 three : Natural
 three =
-    Natural [3]
+    Natural [ 3 ]
 
 
 four : Natural
 four =
-    Natural [4]
+    Natural [ 4 ]
 
 
 five : Natural
 five =
-    Natural [5]
+    Natural [ 5 ]
 
 
 six : Natural
 six =
-    Natural [6]
+    Natural [ 6 ]
 
 
 seven : Natural
 seven =
-    Natural [7]
+    Natural [ 7 ]
 
 
 eight : Natural
 eight =
-    Natural [8]
+    Natural [ 8 ]
 
 
 nine : Natural
 nine =
-    Natural [9]
+    Natural [ 9 ]
 
 
 ten : Natural
 ten =
-    Natural [10]
+    Natural [ 10 ]
+
 
 
 -- CONSTRUCT
@@ -142,7 +175,7 @@ fromIntHelper digitsBE n =
 
     else
         let
-            (q, r) =
+            ( q, r ) =
                 n |> quotientModBy base
         in
         fromIntHelper (r :: digitsBE) q
@@ -198,13 +231,14 @@ fromString input =
 fromBaseBString : Int -> String -> Maybe Natural
 fromBaseBString b input =
     if isBaseB b && isBaseBString b input then
-        Just <| Natural <|
-            String.foldl
-                -- To satisfy the assumptions of sdAdd and sdMul
-                -- we need base-1 >= b.
-                (\char x -> sdAdd (sdMul x b 0 []) (toBaseBDigit b char) [])
-                []
-                input
+        Just <|
+            Natural <|
+                String.foldl
+                    -- To satisfy the assumptions of sdAdd and sdMul
+                    -- we need base-1 >= b.
+                    (\char x -> sdAdd (sdMul x b 0 []) (toBaseBDigit b char) [])
+                    []
+                    input
 
     else
         Nothing
@@ -232,8 +266,8 @@ isBaseBChar b char =
             Char.toCode char
     in
     (0x30 <= code && code <= Basics.min (0x30 + b - 1) 0x39)
-    || (0x41 <= code && code <= 0x41 + b - 11)
-    || (0x61 <= code && code <= 0x61 + b - 11)
+        || (0x41 <= code && code <= 0x41 + b - 11)
+        || (0x61 <= code && code <= 0x61 + b - 11)
 
 
 toBaseBDigit : Int -> Char -> Int
@@ -248,14 +282,15 @@ toBaseBDigit b char =
         code =
             Char.toCode char
     in
-    if (0x30 <= code && code <= Basics.min (0x30 + b - 1) 0x39) then
+    if 0x30 <= code && code <= Basics.min (0x30 + b - 1) 0x39 then
         code - 0x30
 
-    else if (0x41 <= code && code <= 0x41 + b - 11) then
+    else if 0x41 <= code && code <= 0x41 + b - 11 then
         code - 0x41 + 10
 
     else
         code - 0x61 + 10
+
 
 
 -- COMPARISON
@@ -288,8 +323,8 @@ compareHelper xsBE ysBE =
     -- 1. xsBE = [ x_n, ..., x_1, x_0 ] (BE) and 0 <= xi <= base-1
     -- 2. ysBE = [ y_n, ..., y_1, y_0 ] (BE) and 0 <= yi <= base-1
     --
-    case (xsBE, ysBE) of
-        (x :: restXsBE, y :: restYsBE) ->
+    case ( xsBE, ysBE ) of
+        ( x :: restXsBE, y :: restYsBE ) ->
             if x < y then
                 LT
 
@@ -349,6 +384,7 @@ min a b =
         b
 
 
+
 -- CLASSIFICATION
 
 
@@ -382,6 +418,7 @@ isOdd =
     not << isEven
 
 
+
 -- ARITHMETIC
 
 
@@ -400,8 +437,8 @@ addHelper xsLE ysLE carry zsBE =
     -- 3. carry = 0 or 1
     -- 4. zsBE = [ z_k, ..., z_1, z_0 ] (BE) and 0 <= zi <= base-1
     --
-    case (xsLE, ysLE) of
-        ([], []) ->
+    case ( xsLE, ysLE ) of
+        ( [], [] ) ->
             let
                 finalZsBE =
                     if carry == 0 then
@@ -412,23 +449,23 @@ addHelper xsLE ysLE carry zsBE =
             in
             List.reverse finalZsBE
 
-        (x :: restXsLE, []) ->
+        ( x :: restXsLE, [] ) ->
             let
-                (newCarry, z) =
+                ( newCarry, z ) =
                     x + carry |> iDivModBy base
             in
             addHelper restXsLE [] newCarry (z :: zsBE)
 
-        ([], y :: restYsLE) ->
+        ( [], y :: restYsLE ) ->
             let
-                (newCarry, z) =
+                ( newCarry, z ) =
                     y + carry |> iDivModBy base
             in
             addHelper [] restYsLE newCarry (z :: zsBE)
 
-        (x :: restXsLE, y :: restYsLE) ->
+        ( x :: restXsLE, y :: restYsLE ) ->
             let
-                (newCarry, z) =
+                ( newCarry, z ) =
                     x + y + carry |> iDivModBy base
             in
             addHelper restXsLE restYsLE newCarry (z :: zsBE)
@@ -453,33 +490,34 @@ subHelper xsLE ysLE carry zsBE =
     -- 3. carry = 0 or -1
     -- 4. zsBE = [ z_k, ..., z_1, z_0 ] (BE) and 0 <= zi <= base-1
     --
-    case (xsLE, ysLE) of
-        ([], []) ->
+    case ( xsLE, ysLE ) of
+        ( [], [] ) ->
             if carry == 0 then
                 zsBE
                     |> removeLeadingZeros
                     |> List.reverse
 
-            else -- carry == -1 which means xsLE < ysLE
+            else
+                -- carry == -1 which means xsLE < ysLE
                 []
 
-        (x :: restXsLE, []) ->
+        ( x :: restXsLE, [] ) ->
             let
-                (newCarry, z) =
+                ( newCarry, z ) =
                     x + carry |> quotientModBy base
             in
             subHelper restXsLE [] newCarry (z :: zsBE)
 
-        ([], y :: restYsLE) ->
+        ( [], y :: restYsLE ) ->
             let
-                (newCarry, z) =
+                ( newCarry, z ) =
                     carry - y |> quotientModBy base
             in
             subHelper [] restYsLE newCarry (z :: zsBE)
 
-        (x :: restXsLE, y :: restYsLE) ->
+        ( x :: restXsLE, y :: restYsLE ) ->
             let
-                (newCarry, z) =
+                ( newCarry, z ) =
                     x - y + carry |> quotientModBy base
             in
             subHelper restXsLE restYsLE newCarry (z :: zsBE)
@@ -524,15 +562,15 @@ mulHelper xsLE ysBE zsLE =
             mulHelper xsLE restYsBE partialSum
 
 
-divModBy : Natural -> Natural -> Maybe (Natural, Natural)
-divModBy (Natural ysLE as y) (Natural xsLE as x) =
+divModBy : Natural -> Natural -> Maybe ( Natural, Natural )
+divModBy ((Natural ysLE) as y) ((Natural xsLE) as x) =
     case ysLE of
         [] ->
             Nothing
 
-        [d] ->
+        [ d ] ->
             let
-                (qs, r) =
+                ( qs, r ) =
                     sdDivMod xsLE d [] 0
             in
             Just
@@ -541,16 +579,16 @@ divModBy (Natural ysLE as y) (Natural xsLE as x) =
                     zero
 
                   else
-                    Natural [r]
+                    Natural [ r ]
                 )
 
         _ ->
             case compare x y of
                 LT ->
-                    Just (zero, x)
+                    Just ( zero, x )
 
                 EQ ->
-                    Just (one, zero)
+                    Just ( one, zero )
 
                 GT ->
                     let
@@ -560,7 +598,7 @@ divModBy (Natural ysLE as y) (Natural xsLE as x) =
                     x
                         |> divModBy twoY
                         |> Maybe.map
-                            (\(Natural qsLE, r) ->
+                            (\( Natural qsLE, r ) ->
                                 let
                                     twoQsLE =
                                         sdMul qsLE 2 0 []
@@ -580,13 +618,13 @@ divModBy (Natural ysLE as y) (Natural xsLE as x) =
 divBy : Natural -> Natural -> Maybe Natural
 divBy divisor =
     -- Is there a faster algorithm since we don't care about the remainder?
-    divModBy divisor >> Maybe.map (Tuple.first)
+    divModBy divisor >> Maybe.map Tuple.first
 
 
 modBy : Natural -> Natural -> Maybe Natural
 modBy divisor =
     -- Is there a faster algorithm since we don't care about the quotient?
-    divModBy divisor >> Maybe.map (Tuple.second)
+    divModBy divisor >> Maybe.map Tuple.second
 
 
 exp : Natural -> Natural -> Natural
@@ -608,8 +646,8 @@ expHelper b n y =
 
     else
         let
-            (q, r) =
-                n |> divModBy two |> Maybe.withDefault (one, zero)
+            ( q, r ) =
+                n |> divModBy two |> Maybe.withDefault ( one, zero )
 
             bSquared =
                 mul b b
@@ -623,6 +661,7 @@ expHelper b n y =
             expHelper bSquared q (mul y b)
 
 
+
 -- CONVERT
 
 
@@ -634,10 +673,10 @@ toInt (Natural digitsLE) =
 
         _ ->
             let
-                (q, r) =
+                ( q, r ) =
                     iDivModBy numBits maxBits
 
-                (len, maskStart) =
+                ( len, maskStart ) =
                     if r > 0 then
                         ( q + 1
                         , 2 ^ r - 1
@@ -647,7 +686,6 @@ toInt (Natural digitsLE) =
                         ( q
                         , baseMask
                         )
-
             in
             digitsLE
                 |> List.take len
@@ -710,7 +748,7 @@ toBaseBStringHelper b xs result =
 
         _ ->
             let
-                (q, r) =
+                ( q, r ) =
                     sdDivMod xs b [] 0
             in
             toBaseBStringHelper b q (String.cons (toBaseBChar r) result)
@@ -734,6 +772,7 @@ toBaseBChar offset =
 isBaseB : Int -> Bool
 isBaseB b =
     2 <= b && b <= 36
+
 
 
 -- SINGLE-DIGIT OPERATIONS
@@ -761,7 +800,7 @@ sdAdd xs y zs =
 
         x :: restXs ->
             let
-                (carry, z) =
+                ( carry, z ) =
                     iDivModBy base (x + y)
             in
             sdAdd restXs carry (z :: zs)
@@ -790,7 +829,7 @@ sdSub xs y zs =
                 diff =
                     x - y
 
-                (carry, z) =
+                ( carry, z ) =
                     if diff >= 0 then
                         ( 0
                         , diff
@@ -800,7 +839,6 @@ sdSub xs y zs =
                         ( 1
                         , diff + base
                         )
-
             in
             sdSub restXs carry (z :: zs)
 
@@ -848,13 +886,13 @@ sdMul xs y carry zs =
                 product =
                     x * y + carry
 
-                (newCarry, z) =
+                ( newCarry, z ) =
                     iDivModBy base product
             in
             sdMul restXs y newCarry (z :: zs)
 
 
-sdDivMod : List Int -> Int -> List Int -> Int -> (List Int, Int)
+sdDivMod : List Int -> Int -> List Int -> Int -> ( List Int, Int )
 sdDivMod xs y qs r =
     --
     -- xs = qs * y + r
@@ -869,11 +907,11 @@ sdDivMod xs y qs r =
     sdDivModHelper (List.reverse xs) y True qs r
 
 
-sdDivModHelper : List Int -> Int -> Bool -> List Int -> Int -> (List Int, Int)
+sdDivModHelper : List Int -> Int -> Bool -> List Int -> Int -> ( List Int, Int )
 sdDivModHelper xs y isTrailingZero qs r =
     case xs of
         [] ->
-            (qs, r)
+            ( qs, r )
 
         x :: restXs ->
             let
@@ -898,7 +936,7 @@ sdDivModHelper xs y isTrailingZero qs r =
                 value =
                     r * base + x
 
-                (q, newR) =
+                ( q, newR ) =
                     iDivModBy y value
             in
             if isTrailingZero && q == 0 then
@@ -908,17 +946,18 @@ sdDivModHelper xs y isTrailingZero qs r =
                 sdDivModHelper restXs y False (q :: qs) newR
 
 
+
 -- HELPERS
 
 
-iDivModBy : Int -> Int -> (Int, Int)
+iDivModBy : Int -> Int -> ( Int, Int )
 iDivModBy divisor dividend =
     ( dividend // divisor
     , Basics.modBy divisor dividend
     )
 
 
-quotientModBy : Int -> Int -> (Int, Int)
+quotientModBy : Int -> Int -> ( Int, Int )
 quotientModBy divisor dividend =
     ( floor (toFloat dividend / toFloat divisor)
     , Basics.modBy divisor dividend

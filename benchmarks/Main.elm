@@ -27,8 +27,8 @@ multiplicationBenchmarks =
                 nines 100
           in
           benchmark "999..9 (100 9's) * 999..9 (100 9's)" <|
-              \_ ->
-                  Natural.mul oneHundredNines oneHundredNines
+            \_ ->
+                Natural.mul oneHundredNines oneHundredNines
         ]
 
 
@@ -43,8 +43,8 @@ divisionWithRemainderBenchmarks =
                 Natural.mul oneHundredNines oneHundredNines
           in
           benchmark "(999..9 (100 9's))^2 / 999..9 (100 9's)" <|
-              \_ ->
-                  oneHundredNinesSquared |> Natural.divModBy oneHundredNines
+            \_ ->
+                oneHundredNinesSquared |> Natural.divModBy oneHundredNines
         ]
 
 
@@ -57,18 +57,19 @@ exponentiationBenchmarks =
                     |> Maybe.withDefault Natural.zero
           in
           benchmark "2 ^ 1000" <|
-              \_ ->
-                  Natural.exp Natural.two oneThousand
+            \_ ->
+                Natural.exp Natural.two oneThousand
         ]
+
 
 
 -- HELPERS
 
 
--- If n >= 1 then return a natural number consisting of n 9's.
--- Otherwise, it returns 0.
 nines : Int -> Natural
 nines n =
+    -- If n >= 1 then return a natural number consisting of n 9's.
+    -- Otherwise, it returns 0.
     List.repeat n '9'
         |> String.fromList
         |> Natural.fromString
