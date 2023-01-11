@@ -6,6 +6,7 @@ pkgs.mkShell {
     pkgs.elmPackages.elm
     pkgs.elmPackages.elm-format
     pkgs.elmPackages.elm-test
+    pkgs.nodejs-18_x
     pkgs.racket
   ];
 
@@ -13,5 +14,7 @@ pkgs.mkShell {
     ''
     export project="$PWD"
     export PATH="$project/bin:$PATH"
+
+    npm install --loglevel error >/dev/null
     '';
 }
