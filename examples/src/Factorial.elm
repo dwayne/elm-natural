@@ -18,5 +18,5 @@ viewFact n =
         [ H.text <|
             String.fromInt n
                 ++ "! = "
-                ++ Natural.toString (Lib.fact (Lib.fromInt n))
+                ++ Natural.toString (Lib.fact (Natural.fromSafeInt n))
         ]

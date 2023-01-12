@@ -2,7 +2,6 @@ module Lib exposing
     ( fact
     , fib
     , firstNDigitsOfPi
-    , fromInt
     )
 
 import Natural exposing (Natural, five, four, one, ten, two, zero)
@@ -50,11 +49,11 @@ firstNDigitsOfPi n =
     --
     let
         twoThirtyNine =
-            fromInt 239
+            Natural.fromSafeInt 239
 
         -- n2 = n + 10
         n2 =
-            Natural.add (fromInt n) ten
+            Natural.add (Natural.fromSafeInt n) ten
 
         -- 4 * arctan(1/5)
         t1 =
@@ -146,8 +145,3 @@ iDivBy b a =
     --
     Natural.divBy b a
         |> Maybe.withDefault zero
-
-
-fromInt : Int -> Natural
-fromInt =
-    Natural.fromInt >> Maybe.withDefault zero

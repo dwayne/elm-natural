@@ -20,7 +20,7 @@ factSuite =
     describe "fact"
         [ test "100!" <|
             \_ ->
-                Lib.fact (Lib.fromInt 100)
+                Lib.fact (Natural.fromSafeInt 100)
                     |> Natural.toString
                     |> Expect.equal "93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000"
         ]

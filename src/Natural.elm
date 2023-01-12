@@ -13,6 +13,8 @@ module Natural exposing
     , fromHexString
     , fromInt
     , fromOctalString
+    , fromSafeInt
+    , fromSafeString
     , fromString
     , isEven
     , isGreaterThan
@@ -158,6 +160,15 @@ fromInt x =
         Nothing
 
 
+fromSafeInt : Int -> Natural
+fromSafeInt =
+    --
+    -- x is a safe Int iff
+    -- there is an n ∊ ℕ such that fromInt x == Just n.
+    --
+    fromInt >> Maybe.withDefault zero
+
+
 maxBits : Int
 maxBits =
     53
@@ -290,6 +301,15 @@ toBaseBDigit b char =
 
     else
         code - 0x61 + 10
+
+
+fromSafeString : String -> Natural
+fromSafeString =
+    --
+    -- s is a safe String iff
+    -- there is an n ∊ ℕ such that fromString s == Just n.
+    --
+    fromString >> Maybe.withDefault zero
 
 
 
