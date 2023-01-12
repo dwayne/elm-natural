@@ -2,21 +2,21 @@ module Factorial exposing (main)
 
 import Html as H
 import Lib
-import Natural exposing (Natural)
+import Natural
 
 
 main : H.Html msg
 main =
     List.range 0 100
-        |> List.map (viewFact << Lib.fromInt)
+        |> List.map viewFact
         |> H.div []
 
 
-viewFact : Natural -> H.Html msg
+viewFact : Int -> H.Html msg
 viewFact n =
     H.div []
         [ H.text <|
-            Natural.toString n
+            String.fromInt n
                 ++ "! = "
-                ++ Natural.toString (Lib.fact n)
+                ++ Natural.toString (Lib.fact (Lib.fromInt n))
         ]
