@@ -11,6 +11,7 @@ suite =
     describe "Lib"
         [ factSuite
         , fibSuite
+        , firstNDigitsOfPiSuite
         ]
 
 
@@ -33,4 +34,14 @@ fibSuite =
                 Lib.fib 999
                     |> Natural.toString
                     |> Expect.equal "26863810024485359386146727202142923967616609318986952340123175997617981700247881689338369654483356564191827856161443356312976673642210350324634850410377680367334151172899169723197082763985615764450078474174626"
+        ]
+
+
+firstNDigitsOfPiSuite : Test
+firstNDigitsOfPiSuite =
+    describe "firstNDigitsOfPi"
+        [ test "the first 100 digits of π" <|
+            \_ ->
+                Lib.firstNDigitsOfPi 100
+                    |> Expect.equal "3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067"
         ]

@@ -62,6 +62,7 @@ config =
             [ "benchmarks/Main.elm"
             , "examples/src/Factorial.elm"
             , "examples/src/Fibonacci.elm"
+            , "examples/src/Pi.elm"
             ]
     , NoUnused.Parameters.rule
     , NoUnused.Patterns.rule
