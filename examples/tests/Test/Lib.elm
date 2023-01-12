@@ -10,6 +10,7 @@ suite : Test
 suite =
     describe "Lib"
         [ factSuite
+        , fibSuite
         ]
 
 
@@ -25,4 +26,15 @@ factSuite =
                 Natural.fromInt 100
                     |> Maybe.map Lib.fact
                     |> Expect.equal oneHundredFactorial
+        ]
+
+
+fibSuite : Test
+fibSuite =
+    describe "fib"
+        [ test "1000th" <|
+            \_ ->
+                Lib.fib 999
+                    |> Natural.toString
+                    |> Expect.equal "26863810024485359386146727202142923967616609318986952340123175997617981700247881689338369654483356564191827856161443356312976673642210350324634850410377680367334151172899169723197082763985615764450078474174626"
         ]

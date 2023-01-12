@@ -61,6 +61,7 @@ config =
         |> Rule.ignoreErrorsForFiles
             [ "benchmarks/Main.elm"
             , "examples/src/Factorial.elm"
+            , "examples/src/Fibonacci.elm"
             ]
     , NoUnused.Parameters.rule
     , NoUnused.Patterns.rule
