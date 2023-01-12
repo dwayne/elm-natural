@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 cd "$project" && \
-  npx elm-review            \
-    "$project/benchmarks"   \
-    "$project/examples/src" \
-    "$project/review/src"   \
-    "$project/src"          \
-    "$project/tests"        \
+  npx elm-review              \
+    "$project/benchmarks"     \
+    "$project/examples/src"   \
+    "$project/examples/tests" \
+    "$project/review/src"     \
+    "$project/src"            \
+    "$project/tests"          \
     "$@"
