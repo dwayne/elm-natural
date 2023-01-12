@@ -5,26 +5,31 @@ module Lib exposing
     , fromInt
     )
 
-import Natural exposing (Natural)
-
-
-fromInt : Int -> Natural
-fromInt =
-    Natural.fromInt >> Maybe.withDefault Natural.zero
+import Natural exposing (Natural, five, four, one, ten, two, zero)
 
 
 fact : Natural -> Natural
 fact n =
+    --
+    -- Computes n!.
+    --
+    -- See https://en.wikipedia.org/wiki/Factorial.
+    --
     if Natural.isZero n then
-        Natural.one
+        one
 
     else
-        Natural.mul n (fact (Natural.sub n Natural.one))
+        Natural.mul n <| fact (Natural.sub n one)
 
 
 fib : Int -> Natural
 fib n =
-    fibHelper (max 0 n) Natural.zero Natural.one
+    --
+    -- Computes the (n+1)th Fibonacci number.
+    --
+    -- See https://en.wikipedia.org/wiki/Fibonacci_number.
+    --
+    fibHelper (max 0 n) zero one
 
 
 fibHelper : Int -> Natural -> Natural -> Natural
@@ -44,15 +49,6 @@ firstNDigitsOfPi n =
     -- See https://en.wikipedia.org/wiki/Machin-like_formula.
     --
     let
-        four =
-            Natural.four
-
-        five =
-            Natural.five
-
-        ten =
-            Natural.ten
-
         twoThirtyNine =
             fromInt 239
 
@@ -96,18 +92,6 @@ arctanOfReciprocal x n =
     -- Computes arctan(1/x) using the Taylor series expansion for arctangent.
     --
     let
-        zero =
-            Natural.zero
-
-        one =
-            Natural.one
-
-        two =
-            Natural.two
-
-        ten =
-            Natural.ten
-
         -- 10^n
         tenToN =
             Natural.exp ten n
@@ -132,6 +116,8 @@ arctanOfReciprocal x n =
             else
                 let
                     nextSum =
+                        -- This is how we handle the (-1)^i factor.
+                        --
                         if isPos then
                             -- sum = sum + term
                             Natural.add sum term
@@ -159,4 +145,9 @@ iDivBy b a =
     -- Assumes b is non-zero.
     --
     Natural.divBy b a
-        |> Maybe.withDefault Natural.zero
+        |> Maybe.withDefault zero
+
+
+fromInt : Int -> Natural
+fromInt =
+    Natural.fromInt >> Maybe.withDefault zero
