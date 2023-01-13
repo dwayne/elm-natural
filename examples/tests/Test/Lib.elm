@@ -12,6 +12,7 @@ suite =
         [ factSuite
         , fibSuite
         , firstNDigitsOfPiSuite
+        , firstNDigitsOfESuite
         ]
 
 
@@ -44,4 +45,14 @@ firstNDigitsOfPiSuite =
             \_ ->
                 Lib.firstNDigitsOfPi 100
                     |> Expect.equal "3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067"
+        ]
+
+
+firstNDigitsOfESuite : Test
+firstNDigitsOfESuite =
+    describe "firstNDigitsOfE"
+        [ test "the first 100 digits of e" <|
+            \_ ->
+                Lib.firstNDigitsOfE 100
+                    |> Expect.equal "2.718281828459045235360287471352662497757247093699959574966967627724076630353547594571382178525166427"
         ]

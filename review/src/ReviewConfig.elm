@@ -60,6 +60,7 @@ config =
     , NoUnused.Exports.rule
         |> Rule.ignoreErrorsForFiles
             [ "benchmarks/Main.elm"
+            , "examples/src/E.elm"
             , "examples/src/Factorial.elm"
             , "examples/src/Fibonacci.elm"
             , "examples/src/Pi.elm"

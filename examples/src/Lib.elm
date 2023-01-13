@@ -1,6 +1,7 @@
 module Lib exposing
     ( fact
     , fib
+    , firstNDigitsOfE
     , firstNDigitsOfPi
     )
 
@@ -136,6 +137,60 @@ arctanOfReciprocal x n =
                 loop nextSum nextD nextI (not isPos)
     in
     loop zero x zero True
+
+
+firstNDigitsOfE : Int -> String
+firstNDigitsOfE n =
+    --
+    -- Computes the first n digits of Euler's number, e.
+    --
+    -- See https://en.wikipedia.org/wiki/E_(mathematical_constant).
+    --
+    let
+        -- m = n + 10
+        m =
+            Natural.add (Natural.fromSafeInt n) ten
+
+        -- 10^m
+        tenToM =
+            Natural.exp ten m
+
+        loop sum denom i =
+            if i |> Natural.isGreaterThan m then
+                sum
+
+            else
+                let
+                    term =
+                        tenToM |> iDivBy denom
+
+                    nextSum =
+                        Natural.add sum term
+
+                    nextI =
+                        Natural.add i one
+
+                    nextDenom =
+                        Natural.mul denom nextI
+                in
+                loop nextSum nextDenom nextI
+
+        -- 2718281828...
+        digits =
+            loop zero one zero
+                |> Natural.toString
+
+        -- 2
+        wholePart =
+            String.left 1 digits
+
+        -- 718281828...
+        fractionalPart =
+            digits
+                |> String.dropLeft 1
+                |> String.left (n - 1)
+    in
+    wholePart ++ "." ++ fractionalPart
 
 
 iDivBy : Natural -> Natural -> Natural
