@@ -20,6 +20,7 @@ suite =
         , divisionWithRemainderSuite
         , divisionSuite
         , exponentiationSuite
+        , conversionSuite
         ]
 
 
@@ -35,15 +36,11 @@ intConversionSuite =
                 Natural.fromInt n
                     |> Maybe.map Natural.toInt
                     |> Expect.equal (Just n)
-        , test "largest integer" <|
+        , test "maxSafeInt" <|
             \_ ->
-                let
-                    maxSafeInteger =
-                        2 ^ 53 - 1
-                in
-                Natural.fromInt maxSafeInteger
+                Natural.fromInt Natural.maxSafeInt
                     |> Maybe.map Natural.toInt
-                    |> Expect.equal (Just maxSafeInteger)
+                    |> Expect.equal (Just Natural.maxSafeInt)
         ]
 
 
@@ -174,7 +171,7 @@ classificationSuite =
                         Maybe.map Natural.isOne n
                             |> Expect.equal (Just False)
             ]
-        , describe "isNonZero"
+        , describe "isPositive"
             [ fuzz nonNegativeInt "if the Int is 0 then false else true" <|
                 \i ->
                     let
@@ -182,11 +179,11 @@ classificationSuite =
                             Natural.fromInt i
                     in
                     if i == 0 then
-                        Maybe.map Natural.isNonZero n
+                        Maybe.map Natural.isPositive n
                             |> Expect.equal (Just False)
 
                     else
-                        Maybe.map Natural.isNonZero n
+                        Maybe.map Natural.isPositive n
                             |> Expect.equal (Just True)
             ]
         , describe "isEven / isOdd"
@@ -509,6 +506,33 @@ exponentiationSuite =
         ]
 
 
+conversionSuite : Test
+conversionSuite =
+    describe "converters"
+        [ toIntSuite
+        ]
+
+
+toIntSuite : Test
+toIntSuite =
+    describe "toInt"
+        [ test "maxSafeInt" <|
+            \_ ->
+                Natural.fromSafeInt Natural.maxSafeInt
+                    |> Natural.toInt
+                    |> Expect.equal Natural.maxSafeInt
+        , fuzz
+            positiveInt
+            "maxSafeInt + n"
+          <|
+            \n ->
+                Natural.fromSafeInt Natural.maxSafeInt
+                    |> Natural.add (Natural.fromSafeInt n)
+                    |> Natural.toInt
+                    |> Expect.equal (n - 1)
+        ]
+
+
 
 -- CUSTOM FUZZERS
 
@@ -521,6 +545,11 @@ negativeInt =
 nonNegativeInt : Fuzzer Int
 nonNegativeInt =
     Fuzz.intAtLeast 0
+
+
+positiveInt : Fuzzer Int
+positiveInt =
+    Fuzz.intAtLeast 1
 
 
 
@@ -646,7 +675,7 @@ exponentNatural =
 
 toCanonicalBaseBString : String -> String
 toCanonicalBaseBString =
-    removeLeadingZeros >> String.toLower
+    removeLeadingZeros >> String.toUpper
 
 
 removeLeadingZeros : String -> String
