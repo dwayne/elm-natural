@@ -5,31 +5,31 @@ module Lib exposing
     , firstNDigitsOfPi
     )
 
-import Natural exposing (Natural, five, four, one, ten, two, zero)
+import Natural as N exposing (Natural)
 
 
 fact : Natural -> Natural
 fact n =
     --
-    -- Computes n!.
+    -- Compute n!.
     --
     -- See https://en.wikipedia.org/wiki/Factorial.
     --
-    if Natural.isZero n then
-        one
+    if N.isZero n then
+        N.one
 
     else
-        Natural.mul n <| fact (Natural.sub n one)
+        N.mul n <| fact (N.sub n N.one)
 
 
 fib : Int -> Natural
 fib n =
     --
-    -- Computes the (n+1)th Fibonacci number.
+    -- Compute the (n+1)th Fibonacci number.
     --
     -- See https://en.wikipedia.org/wiki/Fibonacci_number.
     --
-    fibHelper (max 0 n) zero one
+    fibHelper (max 0 n) N.zero N.one
 
 
 fibHelper : Int -> Natural -> Natural -> Natural
@@ -38,27 +38,27 @@ fibHelper n a b =
         a
 
     else
-        fibHelper (n - 1) b (Natural.add a b)
+        fibHelper (n - 1) b (N.add a b)
 
 
 firstNDigitsOfPi : Int -> String
 firstNDigitsOfPi n =
     --
-    -- Computes the first n digits of π using John Machin's formula.
+    -- Compute the first n digits of π using John Machin's formula.
     --
     -- See https://en.wikipedia.org/wiki/Machin-like_formula.
     --
     let
         twoThirtyNine =
-            Natural.fromSafeInt 239
+            N.fromSafeInt 239
 
         -- n2 = n + 10
         n2 =
-            Natural.add (Natural.fromSafeInt n) ten
+            N.add (N.fromSafeInt n) N.ten
 
         -- 4 * arctan(1/5)
         t1 =
-            Natural.mul four (arctanOfReciprocal five n2)
+            N.mul N.four (arctanOfReciprocal N.five n2)
 
         -- arctan(1/239)
         t2 =
@@ -66,12 +66,11 @@ firstNDigitsOfPi n =
 
         -- π/4 = 4*arctan(1/5) - arctan(1/239)
         t3 =
-            Natural.sub t1 t2
+            N.sub t1 t2
 
         -- 3141592653...
         digits =
-            Natural.mul four t3
-                |> Natural.toString
+            N.toString <| N.mul N.four t3
 
         -- 3
         wholePart =
@@ -89,28 +88,28 @@ firstNDigitsOfPi n =
 arctanOfReciprocal : Natural -> Natural -> Natural
 arctanOfReciprocal x n =
     --
-    -- Computes arctan(1/x) using the Taylor series expansion for arctangent.
+    -- Compute arctan(1/x) using the Taylor series expansion for arctangent.
     --
     let
         -- 10^n
         tenToN =
-            Natural.exp ten n
+            N.exp N.ten n
 
         -- x^2
         d2 =
-            Natural.mul x x
+            N.mul x x
 
         loop sum d i isPos =
             let
                 -- 2*i + 1
                 odd =
-                    Natural.add (Natural.mul two i) one
+                    N.add (N.mul N.two i) N.one
 
                 -- 10^n / ( d * (2*i + 1) )
                 term =
-                    tenToN |> iDivBy (Natural.mul d odd)
+                    tenToN |> iDivBy (N.mul d odd)
             in
-            if Natural.isZero term then
+            if N.isZero term then
                 sum
 
             else
@@ -120,43 +119,43 @@ arctanOfReciprocal x n =
                         --
                         if isPos then
                             -- sum = sum + term
-                            Natural.add sum term
+                            N.add sum term
 
                         else
                             -- sum = sum - term
-                            Natural.sub sum term
+                            N.sub sum term
 
                     nextD =
                         -- d = d * d2 = d * x^2
-                        Natural.mul d d2
+                        N.mul d d2
 
                     nextI =
                         -- i = i + 1
-                        Natural.add i one
+                        N.add i N.one
                 in
                 loop nextSum nextD nextI (not isPos)
     in
-    loop zero x zero True
+    loop N.zero x N.zero True
 
 
 firstNDigitsOfE : Int -> String
 firstNDigitsOfE n =
     --
-    -- Computes the first n digits of Euler's number, e.
+    -- Compute the first n digits of Euler's number, e.
     --
     -- See https://en.wikipedia.org/wiki/E_(mathematical_constant).
     --
     let
         -- m = n + 10
         m =
-            Natural.add (Natural.fromSafeInt n) ten
+            N.add (N.fromSafeInt n) N.ten
 
         -- 10^m
         tenToM =
-            Natural.exp ten m
+            N.exp N.ten m
 
         loop sum denom i =
-            if i |> Natural.isGreaterThan m then
+            if i |> N.isGreaterThan m then
                 sum
 
             else
@@ -165,20 +164,19 @@ firstNDigitsOfE n =
                         tenToM |> iDivBy denom
 
                     nextSum =
-                        Natural.add sum term
+                        N.add sum term
 
                     nextI =
-                        Natural.add i one
+                        N.add i N.one
 
                     nextDenom =
-                        Natural.mul denom nextI
+                        N.mul denom nextI
                 in
                 loop nextSum nextDenom nextI
 
         -- 2718281828...
         digits =
-            loop zero one zero
-                |> Natural.toString
+            N.toString <| loop N.zero N.one N.zero
 
         -- 2
         wholePart =
@@ -198,5 +196,5 @@ iDivBy b a =
     --
     -- Assumes b is non-zero.
     --
-    Natural.divBy b a
-        |> Maybe.withDefault zero
+    N.divBy b a
+        |> Maybe.withDefault N.zero

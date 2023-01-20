@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+cd "$project" && \
+  rm -rf                  \
+    benchmarks/elm-stuff  \
+    benchmarks/index.html \
+    elm-stuff             \
+    examples/elm-stuff    \
+    node_modules
+
+echo "Please restart your Nix shell and then run \"check\""

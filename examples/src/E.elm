@@ -9,6 +9,6 @@ main =
     H.p
         []
         [ H.text "The first 100 digits of e is "
-        , H.text <| Lib.firstNDigitsOfE 100
+        , H.strong [] [ H.text <| Lib.firstNDigitsOfE 100 ]
         , H.text "."
         ]

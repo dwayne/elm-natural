@@ -65,10 +65,12 @@ import Bitwise
 
 base : Int
 base =
+    --
     -- Constraints:
     --
     -- base-1 >= 36 (fromBaseBString)
     -- base <= 2^26 (sdMul, sdDivMod)
+    --
     2 ^ numBits
 
 
@@ -104,6 +106,7 @@ available memory.
 -}
 type
     Natural
+    --
     -- x = x_{n-1} * base^{n-1} + ... + x_2 * base^2 + x_1 * base + x_0
     --
     -- is represented as
@@ -115,6 +118,7 @@ type
     -- If x == 0 then it is represented as
     --
     --   Natural []
+    --
     = Natural (List Int)
 
 
@@ -208,16 +212,17 @@ ten =
 -- CONSTRUCTORS
 
 
-{-| Create the natural number represented by the given integer, unless the
-integer is negative or greater than [`maxSafeInt`](#maxSafeInt).
-
-    fromInt -1 == Nothing
+{-| Create the natural number represented by the given integer.
 
     fromInt 0 == Just zero
 
     fromInt 1 == Just one
 
     fromInt maxSafeInt == fromString "9007199254740991"
+
+Unless the integer is negative or greater than [`maxSafeInt`](#maxSafeInt).
+
+    fromInt -1 == Nothing
 
     fromInt (maxSafeInt + 1) == Nothing
 
@@ -241,7 +246,7 @@ If the integer isn't in the safe range then [zero](#zero) is returned.
     fromSafeInt (maxSafeInt + 1) == zero
 
 This function is useful for establising **small constants** in a calculation.
-For e.g. to compute the first 100 digits of π the number 239 is needed.
+For e.g. to compute the first 100 digits of π the natural number 239 is needed.
 
     twoThirtyNine : Natural
     twoThirtyNine =
@@ -391,10 +396,7 @@ fromString input =
         fromBaseBString 10 input
 
 
-{-| Let `s` be any string. `s` is a safe string if and only if there is a
-natural number `n` such that `fromString s == Just n`.
-
-Basically, it's best to use this function when you know the string you're
+{-| It's best to use this function when you know the string you're
 dealing with is a valid input to the `fromString` function. If the input is
 invalid then `zero` is returned.
 
@@ -426,10 +428,11 @@ a valid base-`b` digit.
 
 **About base-`b` digits**
 
-A valid base-`b` digit is any digit `d` such that `0 <= d < b`.
+A valid base-`b` digit is any digit `d` such that `0 <= d <= b - 1`.
 
-For bases larger than 10, we use case-insensitive letters to represent the
-base-`b` digits 10 or larger. So,
+For bases larger than 10, we use case-insensitive letters from the
+[Latin alphabet](https://en.wikipedia.org/wiki/Latin_alphabet) to represent the
+base-`b` digits that are 10 or larger. So,
 
 ```txt
 A or a represents 10
@@ -464,6 +467,7 @@ fromBaseBString b input =
                 String.foldl
                     -- To satisfy the assumptions of sdAdd and sdMul
                     -- we need base-1 >= b.
+                    --
                     (\char x -> sdAdd (sdMul x b 0 []) (toBaseBDigit b char) [])
                     []
                     input
@@ -575,7 +579,7 @@ compareHelper xsBE ysBE =
             EQ
 
 
-{-| Tests whether or not the second natural number is less than the first.
+{-| Determine if the second natural number is less than the first.
 
     isLessThan eight two == True
 
@@ -590,7 +594,7 @@ isLessThan b a =
     compare a b == LT
 
 
-{-| Tests whether or not the second natural number is less than or equal to the
+{-| Determine if the second natural number is less than or equal to the
 first.
 
     isLessThanOrEqual eight two == True
@@ -602,13 +606,15 @@ first.
 -}
 isLessThanOrEqual : Natural -> Natural -> Bool
 isLessThanOrEqual b a =
+    --
     -- Is a <= b?
     --
     -- a <= b iff not (a > b)
+    --
     not (a |> isGreaterThan b)
 
 
-{-| Tests whether or not the second natural number is greater than the first.
+{-| Determine if the second natural number is greater than the first.
 
     isGreaterThan eight two == False
 
@@ -619,11 +625,13 @@ isLessThanOrEqual b a =
 -}
 isGreaterThan : Natural -> Natural -> Bool
 isGreaterThan b a =
+    --
     -- Is a > b?
+    --
     compare a b == GT
 
 
-{-| Tests whether or not the second natural number is greater than or equal to
+{-| Determine if the second natural number is greater than or equal to
 the first.
 
     isGreaterThanOrEqual eight two == False
@@ -635,9 +643,11 @@ the first.
 -}
 isGreaterThanOrEqual : Natural -> Natural -> Bool
 isGreaterThanOrEqual b a =
+    --
     -- Is a >= b?
     --
     -- a >= b iff not (a < b)
+    --
     not (a |> isLessThan b)
 
 
@@ -805,7 +815,7 @@ addHelper xsLE ysLE carry zsBE =
             addHelper restXsLE restYsLE newCarry (z :: zsBE)
 
 
-{-| Subtract two natural numbers.
+{-| Subtract the second natural number from the first.
 
     sub ten four == six
 
@@ -817,10 +827,12 @@ Thus, if the second natural number is larger than the first, 0 is returned.
 -}
 sub : Natural -> Natural -> Natural
 sub (Natural xsLE) (Natural ysLE) =
+    --
     -- Saturating subtraction
     --
     -- x - y = n, where n + y = x and n is a natural number (if x >= y)
     --       = 0                                            (if x < y)
+    --
     Natural <| subHelper xsLE ysLE 0 []
 
 
@@ -920,9 +932,9 @@ Why? Because,
 
     nine == add (mul four two) one
 
-Of course, division by 0 is not allowed.
+Division by 0 is not allowed. So, for all `n : Natural`,
 
-    divModBy zero n == Nothing -- for all natural numbers n
+    divModBy zero n == Nothing
 
 **Note:** _The performance of this function is subpar and will be improved in a
 future release._
@@ -985,7 +997,9 @@ divModBy ((Natural ysLE) as y) ((Natural xsLE) as x) =
 
     divBy two nine == Just four
 
-    divBy zero n == Nothing -- for all natural numbers n
+Division by 0 is not allowed. So, for all `n : Natural`,
+
+    divModBy zero n == Nothing
 
 **Note:** _The performance of this function is subpar and will be improved in a
 future release._
@@ -993,7 +1007,9 @@ future release._
 -}
 divBy : Natural -> Natural -> Maybe Natural
 divBy divisor =
+    --
     -- Is there a faster algorithm since we don't care about the remainder?
+    --
     divModBy divisor >> Maybe.map Tuple.first
 
 
@@ -1001,7 +1017,9 @@ divBy divisor =
 
     modBy two nine == Just one
 
-    modBy zero n == Nothing -- for all natural numbers n
+Modulo by 0 is not allowed. So, for all `n : Natural`,
+
+    modBy zero n == Nothing
 
 **Note:** _The performance of this function is subpar and will be improved in a
 future release._
@@ -1009,7 +1027,9 @@ future release._
 -}
 modBy : Natural -> Natural -> Maybe Natural
 modBy divisor =
+    --
     -- Is there a faster algorithm since we don't care about the quotient?
+    --
     divModBy divisor >> Maybe.map Tuple.second
 
 
@@ -1018,15 +1038,15 @@ natural number (called the exponent).
 
     exp two three == eight
 
-    exp p zero == one -- for all positive natural numbers p
+For all `p : Natural`, where `p >= 1` (i.e. `p` is a positive natural number),
 
-    exp zero p == zero -- for all positive natural numbers p
+    exp p zero == one
 
-**What is `0^0`?**
+    exp zero p == zero
+
+**[What is `0^0`?](https://www.maa.org/book/export/html/116806)**
 
     exp zero zero == one
-
-Learn more about [zero to the power of zero](https://en.wikipedia.org/wiki/Zero_to_the_power_of_zero).
 
 -}
 exp : Natural -> Natural -> Natural
@@ -1067,8 +1087,7 @@ expHelper b n y =
 -- CONVERSION
 
 
-{-| For any natural number, `n`, it returns `n mod (maxSafeInt + 1)`. Hence,
-the result is always between 0 and [`maxSafeInt`](#maxSafeInt) inclusive.
+{-| Convert any natural number, `n`, to `n mod (maxSafeInt + 1)`.
 
     toInt zero == 0
 
@@ -1123,7 +1142,7 @@ toIntHelper mask x digitsBE =
                 restDigitsBE
 
 
-{-| Convert any natural number to its binary representation.
+{-| Convert any natural number to its binary (base-2) representation.
 
     toBinaryString zero == "0"
 
@@ -1141,7 +1160,7 @@ toBinaryString =
     toBaseBString 2 >> Maybe.withDefault ""
 
 
-{-| Convert any natural number to its octal representation.
+{-| Convert any natural number to its octal (base-8) representation.
 
     toOctalString zero == "0"
 
@@ -1159,7 +1178,7 @@ toOctalString =
     toBaseBString 8 >> Maybe.withDefault ""
 
 
-{-| Convert any natural number to its hexadecimal representation.
+{-| Convert any natural number to its hexadecimal (base-16) representation.
 
     toHexString zero == "0"
 
@@ -1177,7 +1196,7 @@ toHexString =
     toBaseBString 16 >> Maybe.withDefault ""
 
 
-{-| Convert any natural number to its decimal representation.
+{-| Convert any natural number to its decimal (base-10) representation.
 
     toString zero == "0"
 
@@ -1198,11 +1217,12 @@ toString =
 {-| Convert any natural number to its base-`b` representation.
 
 `b` must be between 2 and 36 inclusive and each character in the resulting
-string will be a valid base-`b` digit. If the character is a letter then it's
-guaranteed to be uppercase.
+string will be a valid base-`b` digit.
 
-Please refer to [`fromBaseBString`](#fromBaseBString) to learn more about
-base-`b` digits.
+All [Latin letters](https://en.wikipedia.org/wiki/Latin_alphabet) in the
+base-`b` representation will be in uppercase.
+
+For e.g.
 
     toBaseBString 2 (fromSafeInt 1729) == Just "11011000001"
 
@@ -1217,6 +1237,9 @@ base-`b` digits.
 For any `k : Int` where `k < 2` or `k > 36`, and any `n : Natural`,
 
     toBaseBString k n == Nothing
+
+**N.B.** _Please refer to [`fromBaseBString`](#fromBaseBString) to learn more about
+base-`b` digits._
 
 -}
 toBaseBString : Int -> Natural -> Maybe String
@@ -1388,6 +1411,7 @@ sdDivModHelper xs y isTrailingZero qs r =
                 --
                 -- This gives n <= 26, i.e. the maximum base we will be able to
                 -- use is 2^26.
+                --
                 value =
                     r * base + x
 

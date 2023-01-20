@@ -9,6 +9,6 @@ main =
     H.p
         []
         [ H.text "The first 100 digits of π is "
-        , H.text <| Lib.firstNDigitsOfPi 100
+        , H.strong [] [ H.text <| Lib.firstNDigitsOfPi 100 ]
         , H.text "."
         ]

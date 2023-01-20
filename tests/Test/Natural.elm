@@ -2,7 +2,7 @@ module Test.Natural exposing (suite)
 
 import Expect
 import Fuzz exposing (Fuzzer)
-import Natural exposing (Natural)
+import Natural as N exposing (Natural)
 import Test exposing (Test, describe, fuzz, fuzz2, fuzz3, test)
 
 
@@ -29,18 +29,18 @@ intConversionSuite =
     describe "fromInt / toInt conversion"
         [ fuzz negativeInt "negative integers" <|
             \n ->
-                Natural.fromInt n
+                N.fromInt n
                     |> Expect.equal Nothing
         , fuzz nonNegativeInt "non-negative integers" <|
             \n ->
-                Natural.fromInt n
-                    |> Maybe.map Natural.toInt
+                N.fromInt n
+                    |> Maybe.map N.toInt
                     |> Expect.equal (Just n)
         , test "maxSafeInt" <|
             \_ ->
-                Natural.fromInt Natural.maxSafeInt
-                    |> Maybe.map Natural.toInt
-                    |> Expect.equal (Just Natural.maxSafeInt)
+                N.fromInt N.maxSafeInt
+                    |> Maybe.map N.toInt
+                    |> Expect.equal (Just N.maxSafeInt)
         ]
 
 
@@ -49,48 +49,48 @@ constantsSuite =
     describe "constants"
         [ test "0" <|
             \_ ->
-                Just Natural.zero
-                    |> Expect.equal (Natural.fromInt 0)
+                N.zero
+                    |> Expect.equal (N.fromSafeInt 0)
         , test "1" <|
             \_ ->
-                Just Natural.one
-                    |> Expect.equal (Natural.fromInt 1)
+                N.one
+                    |> Expect.equal (N.fromSafeInt 1)
         , test "2" <|
             \_ ->
-                Just Natural.two
-                    |> Expect.equal (Natural.fromInt 2)
+                N.two
+                    |> Expect.equal (N.fromSafeInt 2)
         , test "3" <|
             \_ ->
-                Just Natural.three
-                    |> Expect.equal (Natural.fromInt 3)
+                N.three
+                    |> Expect.equal (N.fromSafeInt 3)
         , test "4" <|
             \_ ->
-                Just Natural.four
-                    |> Expect.equal (Natural.fromInt 4)
+                N.four
+                    |> Expect.equal (N.fromSafeInt 4)
         , test "5" <|
             \_ ->
-                Just Natural.five
-                    |> Expect.equal (Natural.fromInt 5)
+                N.five
+                    |> Expect.equal (N.fromSafeInt 5)
         , test "6" <|
             \_ ->
-                Just Natural.six
-                    |> Expect.equal (Natural.fromInt 6)
+                N.six
+                    |> Expect.equal (N.fromSafeInt 6)
         , test "7" <|
             \_ ->
-                Just Natural.seven
-                    |> Expect.equal (Natural.fromInt 7)
+                N.seven
+                    |> Expect.equal (N.fromSafeInt 7)
         , test "8" <|
             \_ ->
-                Just Natural.eight
-                    |> Expect.equal (Natural.fromInt 8)
+                N.eight
+                    |> Expect.equal (N.fromSafeInt 8)
         , test "9" <|
             \_ ->
-                Just Natural.nine
-                    |> Expect.equal (Natural.fromInt 9)
+                N.nine
+                    |> Expect.equal (N.fromSafeInt 9)
         , test "10" <|
             \_ ->
-                Just Natural.ten
-                    |> Expect.equal (Natural.fromInt 10)
+                N.ten
+                    |> Expect.equal (N.fromSafeInt 10)
         ]
 
 
@@ -99,8 +99,8 @@ baseBStringConversionSuite =
     describe "fromBaseBString / toBaseBString conversion"
         [ fuzz baseBString "base b string" <|
             \( b, s ) ->
-                Natural.fromBaseBString b s
-                    |> Maybe.andThen (Natural.toBaseBString b)
+                N.fromBaseBString b s
+                    |> Maybe.andThen (N.toBaseBString b)
                     |> Expect.equal (Just <| toCanonicalBaseBString s)
         ]
 
@@ -116,24 +116,24 @@ comparisonSuite =
             \a b ->
                 let
                     x =
-                        Natural.fromInt a
+                        N.fromSafeInt a
 
                     y =
-                        Natural.fromInt b
+                        N.fromSafeInt b
                 in
-                Just (compare a b)
-                    |> Expect.equal (Maybe.map2 Natural.compare x y)
+                compare a b
+                    |> Expect.equal (N.compare x y)
         , fuzz natural "∀ n ∊ ℕ, n == n" <|
             \n ->
-                Natural.compare n n
+                N.compare n n
                     |> Expect.equal EQ
         , fuzz natural "∀ n ∊ ℕ, n < n + 1" <|
             \n ->
-                Natural.compare n (Natural.add n Natural.one)
+                N.compare n (N.add n N.one)
                     |> Expect.equal LT
         , fuzz natural "∀ n ∊ ℕ, n + 1 > n" <|
             \n ->
-                Natural.compare (Natural.add n Natural.one) n
+                N.compare (N.add n N.one) n
                     |> Expect.equal GT
         ]
 
@@ -146,45 +146,45 @@ classificationSuite =
                 \i ->
                     let
                         n =
-                            Natural.fromInt i
+                            N.fromSafeInt i
                     in
                     if i == 0 then
-                        Maybe.map Natural.isZero n
-                            |> Expect.equal (Just True)
+                        N.isZero n
+                            |> Expect.equal True
 
                     else
-                        Maybe.map Natural.isZero n
-                            |> Expect.equal (Just False)
+                        N.isZero n
+                            |> Expect.equal False
             ]
         , describe "isOne"
             [ fuzz nonNegativeInt "if the Int is 1 then true else false" <|
                 \i ->
                     let
                         n =
-                            Natural.fromInt i
+                            N.fromSafeInt i
                     in
                     if i == 1 then
-                        Maybe.map Natural.isOne n
-                            |> Expect.equal (Just True)
+                        N.isOne n
+                            |> Expect.equal True
 
                     else
-                        Maybe.map Natural.isOne n
-                            |> Expect.equal (Just False)
+                        N.isOne n
+                            |> Expect.equal False
             ]
         , describe "isPositive"
             [ fuzz nonNegativeInt "if the Int is 0 then false else true" <|
                 \i ->
                     let
                         n =
-                            Natural.fromInt i
+                            N.fromSafeInt i
                     in
                     if i == 0 then
-                        Maybe.map Natural.isPositive n
-                            |> Expect.equal (Just False)
+                        N.isPositive n
+                            |> Expect.equal False
 
                     else
-                        Maybe.map Natural.isPositive n
-                            |> Expect.equal (Just True)
+                        N.isPositive n
+                            |> Expect.equal True
             ]
         , describe "isEven / isOdd"
             [ fuzz
@@ -194,27 +194,27 @@ classificationSuite =
                 \i ->
                     let
                         n =
-                            Natural.fromInt i
+                            N.fromSafeInt i
                     in
                     if isEven i then
-                        Maybe.map Natural.isEven n
-                            |> Expect.equal (Just True)
+                        N.isEven n
+                            |> Expect.equal True
 
                     else
-                        Maybe.map Natural.isOdd n
-                            |> Expect.equal (Just True)
+                        N.isOdd n
+                            |> Expect.equal True
             , fuzz
                 natural
                 "∀ n ∊ ℕ, n is even iff n + 1 is odd"
               <|
                 \n ->
-                    if Natural.isEven n then
-                        Natural.isOdd (Natural.add n Natural.one)
+                    if N.isEven n then
+                        N.isOdd (N.add n N.one)
                             |> Expect.equal True
 
                     else
-                        ( Natural.isOdd n
-                        , Natural.isEven (Natural.add n Natural.one)
+                        ( N.isOdd n
+                        , N.isEven (N.add n N.one)
                         )
                             |> Expect.equal ( True, True )
             ]
@@ -227,20 +227,20 @@ additionSuite =
         [ fuzz natural "0 is the identity" <|
             \n ->
                 -- n + 0 = n = 0 + n
-                ( Natural.add n Natural.zero
-                , Natural.add Natural.zero n
+                ( N.add n N.zero
+                , N.add N.zero n
                 )
                     |> Expect.equal ( n, n )
         , fuzz2 natural natural "is commutative" <|
             \a b ->
                 -- a + b = b + a
-                Natural.add a b
-                    |> Expect.equal (Natural.add b a)
+                N.add a b
+                    |> Expect.equal (N.add b a)
         , fuzz3 natural natural natural "is associative" <|
             \a b c ->
                 -- (a + b) + c = a + (b + c)
-                Natural.add (Natural.add a b) c
-                    |> Expect.equal (Natural.add a (Natural.add b c))
+                N.add (N.add a b) c
+                    |> Expect.equal (N.add a (N.add b c))
         ]
 
 
@@ -249,30 +249,30 @@ subtractionSuite =
     describe "(saturating) subtraction"
         [ fuzz natural "∀ n ∊ ℕ, n - 0 = n" <|
             \n ->
-                Natural.sub n Natural.zero
+                N.sub n N.zero
                     |> Expect.equal n
         , fuzz natural "∀ n ∊ ℕ, 0 - n = 0" <|
             \n ->
-                Natural.sub Natural.zero n
-                    |> Expect.equal Natural.zero
+                N.sub N.zero n
+                    |> Expect.equal N.zero
         , fuzz natural "∀ n ∊ ℕ, n - n = 0" <|
             \n ->
-                Natural.sub n n
-                    |> Expect.equal Natural.zero
+                N.sub n n
+                    |> Expect.equal N.zero
         , fuzz2 natural natural "the definition" <|
             \a b ->
                 let
                     c =
-                        Natural.sub a b
+                        N.sub a b
                 in
-                if a |> Natural.isGreaterThanOrEqual b then
+                if a |> N.isGreaterThanOrEqual b then
                     -- c + b = a
-                    Natural.add c b
+                    N.add c b
                         |> Expect.equal a
 
                 else
                     -- c = 0
-                    c |> Expect.equal Natural.zero
+                    c |> Expect.equal N.zero
         ]
 
 
@@ -282,38 +282,38 @@ multiplicationSuite =
         [ fuzz natural "1 is the identity" <|
             \n ->
                 -- n * 1 = n = 1 * n
-                ( Natural.mul n Natural.one
-                , Natural.mul Natural.one n
+                ( N.mul n N.one
+                , N.mul N.one n
                 )
                     |> Expect.equal ( n, n )
         , fuzz natural "∀ n ∊ ℕ, n * 0 = 0 = 0 * n" <|
             \n ->
-                ( Natural.mul n Natural.zero
-                , Natural.mul Natural.zero n
+                ( N.mul n N.zero
+                , N.mul N.zero n
                 )
-                    |> Expect.equal ( Natural.zero, Natural.zero )
+                    |> Expect.equal ( N.zero, N.zero )
         , fuzz2 natural natural "is commutative" <|
             \a b ->
                 -- a * b = b * a
-                Natural.mul a b
-                    |> Expect.equal (Natural.mul b a)
+                N.mul a b
+                    |> Expect.equal (N.mul b a)
         , fuzz3 natural natural natural "is associative" <|
             \a b c ->
                 -- (a * b) * c = a * (b * c)
-                Natural.mul (Natural.mul a b) c
-                    |> Expect.equal (Natural.mul a (Natural.mul b c))
+                N.mul (N.mul a b) c
+                    |> Expect.equal (N.mul a (N.mul b c))
         , fuzz3 natural natural natural "left-distributive over addition" <|
             \a b c ->
                 -- a * (b + c) = a * b + a * c
-                Natural.mul a (Natural.add b c)
+                N.mul a (N.add b c)
                     |> Expect.equal
-                        (Natural.add (Natural.mul a b) (Natural.mul a c))
+                        (N.add (N.mul a b) (N.mul a c))
         , fuzz3 natural natural natural "right-distributive over addition" <|
             \a b c ->
                 -- (b + c) * a = b * a + c * a
-                Natural.mul (Natural.add b c) a
+                N.mul (N.add b c) a
                     |> Expect.equal
-                        (Natural.add (Natural.mul b a) (Natural.mul c a))
+                        (N.add (N.mul b a) (N.mul c a))
         ]
 
 
@@ -322,44 +322,44 @@ divisionWithRemainderSuite =
     describe "division with remainder"
         [ fuzz2 natural natural "the definition" <|
             \a b ->
-                case a |> Natural.divModBy b of
+                case a |> N.divModBy b of
                     Just ( q, r ) ->
-                        if a |> Natural.isLessThan b then
+                        if a |> N.isLessThan b then
                             ( q, r )
-                                |> Expect.equal ( Natural.zero, a )
+                                |> Expect.equal ( N.zero, a )
 
                         else if a == b then
                             ( q, r )
-                                |> Expect.equal ( Natural.one, Natural.zero )
+                                |> Expect.equal ( N.one, N.zero )
 
                         else
                             -- q * b + r = a
-                            Natural.add (Natural.mul q b) r
+                            N.add (N.mul q b) r
                                 |> Expect.equal a
 
                     Nothing ->
-                        b |> Expect.equal Natural.zero
+                        b |> Expect.equal N.zero
         , fuzz natural "by 0 is undefined" <|
             \n ->
                 n
-                    |> Natural.divModBy Natural.zero
+                    |> N.divModBy N.zero
                     |> Expect.equal Nothing
         , fuzz natural "by 1" <|
             \n ->
                 n
-                    |> Natural.divModBy Natural.one
-                    |> Expect.equal (Just ( n, Natural.zero ))
+                    |> N.divModBy N.one
+                    |> Expect.equal (Just ( n, N.zero ))
         , fuzz natural "by 2 and isEven / isOdd relation" <|
             \n ->
-                case n |> Natural.divModBy Natural.two of
+                case n |> N.divModBy N.two of
                     Just ( _, r ) ->
-                        if r == Natural.zero then
-                            Natural.isEven n
+                        if r == N.zero then
+                            N.isEven n
                                 |> Expect.equal True
 
                         else
-                            ( r, Natural.isOdd n )
-                                |> Expect.equal ( Natural.one, True )
+                            ( r, N.isOdd n )
+                                |> Expect.equal ( N.one, True )
 
                     Nothing ->
                         Expect.fail "division by 2 is NEVER undefined"
@@ -379,36 +379,12 @@ divisionSuite =
                 -- (a * b) / (a * c) = b / c
                 let
                     lhs =
-                        Natural.mul a b |> Natural.divBy (Natural.mul a c)
+                        N.mul a b |> N.divBy (N.mul a c)
 
                     rhs =
-                        b |> Natural.divBy c
+                        b |> N.divBy c
                 in
                 lhs |> Expect.equal rhs
-
-        --
-        -- , fuzz3 natural natural natural "distributes over addition" <|
-        --     \a b c ->
-        --         -- (a + b) / c = a / c + b / c
-        --         let
-        --             lhs =
-        --                 Natural.add a b |> Natural.divBy c
-        --
-        --             x =
-        --                 a |> Natural.divBy c
-        --
-        --             y =
-        --                 b |> Natural.divBy c
-        --
-        --             rhs =
-        --                 Maybe.map2 Natural.add x y
-        --         in
-        --         lhs |> Expect.equal rhs
-        --
-        -- This is not true in general for division over the natural numbers.
-        --
-        -- For e.g. try a = 1, b = 1, and c = 2.
-        --
         ]
 
 
@@ -417,20 +393,20 @@ exponentiationSuite =
     describe "exponentiation"
         [ test "0 ^ 0 = 1" <|
             \_ ->
-                Natural.exp Natural.zero Natural.zero
-                    |> Expect.equal Natural.one
+                N.exp N.zero N.zero
+                    |> Expect.equal N.one
         , fuzz positiveNatural "∀ a ∊ ℕ+, a ^ 0 = 1" <|
             \a ->
-                Natural.exp a Natural.zero
-                    |> Expect.equal Natural.one
+                N.exp a N.zero
+                    |> Expect.equal N.one
         , fuzz natural "∀ a ∊ ℕ, a ^ 1 = a" <|
             \a ->
-                Natural.exp a Natural.one
+                N.exp a N.one
                     |> Expect.equal a
         , fuzz positiveNatural "∀ n ∊ ℕ+, 0 ^ n = 0" <|
             \n ->
-                Natural.exp Natural.zero n
-                    |> Expect.equal Natural.zero
+                N.exp N.zero n
+                    |> Expect.equal N.zero
         , fuzz3
             baseNatural
             exponentNatural
@@ -441,10 +417,10 @@ exponentiationSuite =
                 -- a^m * a^n = a^{m+n}
                 let
                     lhs =
-                        Natural.mul (Natural.exp a m) (Natural.exp a n)
+                        N.mul (N.exp a m) (N.exp a n)
 
                     rhs =
-                        Natural.exp a (Natural.add m n)
+                        N.exp a (N.add m n)
                 in
                 lhs |> Expect.equal rhs
         , fuzz3
@@ -457,10 +433,10 @@ exponentiationSuite =
                 -- a^n * b^n = (a * b)^n
                 let
                     lhs =
-                        Natural.mul (Natural.exp a n) (Natural.exp b n)
+                        N.mul (N.exp a n) (N.exp b n)
 
                     rhs =
-                        Natural.exp (Natural.mul a b) n
+                        N.exp (N.mul a b) n
                 in
                 lhs |> Expect.equal rhs
         , fuzz3
@@ -473,20 +449,20 @@ exponentiationSuite =
                 -- a^m / a^n = a^{m-n}
                 let
                     lhs =
-                        Natural.exp a m |> Natural.divBy (Natural.exp a n)
+                        N.exp a m |> N.divBy (N.exp a n)
                 in
-                if m |> Natural.isGreaterThanOrEqual n then
+                if m |> N.isGreaterThanOrEqual n then
                     let
                         rhs =
-                            Just <| Natural.exp a (Natural.sub m n)
+                            Just <| N.exp a (N.sub m n)
                     in
                     lhs |> Expect.equal rhs
 
-                else if a == Natural.one then
-                    lhs |> Expect.equal (Just Natural.one)
+                else if a == N.one then
+                    lhs |> Expect.equal (Just N.one)
 
                 else
-                    lhs |> Expect.equal (Just Natural.zero)
+                    lhs |> Expect.equal (Just N.zero)
         , fuzz3
             baseNatural
             exponentNatural
@@ -497,10 +473,10 @@ exponentiationSuite =
                 -- (a^m)^n = a^{m*n}
                 let
                     lhs =
-                        Natural.exp (Natural.exp a m) n
+                        N.exp (N.exp a m) n
 
                     rhs =
-                        Natural.exp a (Natural.mul m n)
+                        N.exp a (N.mul m n)
                 in
                 lhs |> Expect.equal rhs
         ]
@@ -518,17 +494,17 @@ toIntSuite =
     describe "toInt"
         [ test "maxSafeInt" <|
             \_ ->
-                Natural.fromSafeInt Natural.maxSafeInt
-                    |> Natural.toInt
-                    |> Expect.equal Natural.maxSafeInt
+                N.fromSafeInt N.maxSafeInt
+                    |> N.toInt
+                    |> Expect.equal N.maxSafeInt
         , fuzz
             positiveInt
             "maxSafeInt + n"
           <|
             \n ->
-                Natural.fromSafeInt Natural.maxSafeInt
-                    |> Natural.add (Natural.fromSafeInt n)
-                    |> Natural.toInt
+                N.fromSafeInt N.maxSafeInt
+                    |> N.add (N.fromSafeInt n)
+                    |> N.toInt
                     |> Expect.equal (n - 1)
         ]
 
@@ -552,13 +528,12 @@ positiveInt =
     Fuzz.intAtLeast 1
 
 
-
--- Generates random base b (2 <= b <= 36) strings of at least 1 character
--- and at most 100 characters.
-
-
 baseBString : Fuzzer ( Int, String )
 baseBString =
+    --
+    -- Generate random base b (2 <= b <= 36) strings
+    -- of at least 1 character and at most 100 characters.
+    --
     Fuzz.intRange 2 36
         |> Fuzz.andThen
             (\b ->
@@ -600,39 +575,31 @@ natural =
     baseBString
         |> Fuzz.andThen
             (\( b, s ) ->
-                case Natural.fromBaseBString b s of
+                case N.fromBaseBString b s of
                     Just n ->
                         Fuzz.constant n
 
                     Nothing ->
                         -- This should NEVER happen if both baseBString and
                         -- Natural.fromBaseBString are written correctly.
+                        --
                         Fuzz.invalid <| "natural: an unexpected error"
             )
 
 
 positiveNatural : Fuzzer Natural
 positiveNatural =
-    Fuzz.map (Natural.add Natural.one) natural
-
-
-
--- Returns a reasonably sized natural number for the base of an exponentiation.
+    Fuzz.map (N.add N.one) natural
 
 
 baseNatural : Fuzzer Natural
 baseNatural =
+    --
+    -- Return a reasonably sized natural number
+    -- for the base of an exponentiation.
+    --
     Fuzz.uniformInt 100
-        |> Fuzz.andThen
-            (\i ->
-                case Natural.fromInt i of
-                    Just n ->
-                        Fuzz.constant n
-
-                    Nothing ->
-                        -- This should NEVER happen.
-                        Fuzz.invalid <| "baseNatural: an unexpected error"
-            )
+        |> Fuzz.andThen (Fuzz.constant << N.fromSafeInt)
 
 
 basePositiveNatural : Fuzzer Natural
@@ -641,32 +608,22 @@ basePositiveNatural =
         |> Fuzz.andThen
             (\n ->
                 Fuzz.constant <|
-                    if Natural.isZero n then
-                        Natural.one
+                    if N.isZero n then
+                        N.one
 
                     else
                         n
             )
 
 
-
--- Returns a reasonably sized natural number for the exponent (power) of an
--- exponentiation.
-
-
 exponentNatural : Fuzzer Natural
 exponentNatural =
+    --
+    -- Return a reasonably sized natural number
+    -- for the exponent (power) of an exponentiation.
+    --
     Fuzz.uniformInt 50
-        |> Fuzz.andThen
-            (\i ->
-                case Natural.fromInt i of
-                    Just n ->
-                        Fuzz.constant n
-
-                    Nothing ->
-                        -- This should NEVER happen.
-                        Fuzz.invalid <| "exponentNatural: an unexpected error"
-            )
+        |> Fuzz.andThen (Fuzz.constant << N.fromSafeInt)
 
 
 

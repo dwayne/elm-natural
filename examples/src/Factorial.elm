@@ -2,7 +2,7 @@ module Factorial exposing (main)
 
 import Html as H
 import Lib
-import Natural
+import Natural as N
 
 
 main : H.Html msg
@@ -18,5 +18,5 @@ viewFact n =
         [ H.text <|
             String.fromInt n
                 ++ "! = "
-                ++ Natural.toString (Lib.fact (Natural.fromSafeInt n))
+                ++ N.toString (Lib.fact (N.fromSafeInt n))
         ]

@@ -21,6 +21,10 @@ for main in $(echo "$project/src/*.elm" "$project/examples/src/*.elm"); do
   cd "${main%/src/*.elm}" && elm make "$main" --output=/dev/null || exit 1
 done >/dev/null
 
+if ! build-benchmarks &>/dev/null; then
+  fail "There was a problem building your benchmarks. Run: build-benchmarks"
+fi
+
 if ! review &>/dev/null; then
   fail "One or more reviews failed. Run: review"
 fi

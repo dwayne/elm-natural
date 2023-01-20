@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Benchmark exposing (Benchmark, benchmark, describe)
 import Benchmark.Runner as BR
-import Natural exposing (Natural)
+import Natural as N exposing (Natural)
 
 
 main : BR.BenchmarkProgram
@@ -28,7 +28,7 @@ multiplicationBenchmarks =
           in
           benchmark "999..9 (100 9's) * 999..9 (100 9's)" <|
             \_ ->
-                Natural.mul oneHundredNines oneHundredNines
+                N.mul oneHundredNines oneHundredNines
         ]
 
 
@@ -40,11 +40,11 @@ divisionWithRemainderBenchmarks =
                 nines 100
 
             oneHundredNinesSquared =
-                Natural.mul oneHundredNines oneHundredNines
+                N.mul oneHundredNines oneHundredNines
           in
           benchmark "(999..9 (100 9's))^2 / 999..9 (100 9's)" <|
             \_ ->
-                oneHundredNinesSquared |> Natural.divModBy oneHundredNines
+                oneHundredNinesSquared |> N.divModBy oneHundredNines
         ]
 
 
@@ -53,12 +53,11 @@ exponentiationBenchmarks =
     describe "exponentiation"
         [ let
             oneThousand =
-                Natural.fromInt 1000
-                    |> Maybe.withDefault Natural.zero
+                N.fromSafeInt 1000
           in
           benchmark "2 ^ 1000" <|
             \_ ->
-                Natural.exp Natural.two oneThousand
+                N.exp N.two oneThousand
         ]
 
 
@@ -68,9 +67,9 @@ exponentiationBenchmarks =
 
 nines : Int -> Natural
 nines n =
-    -- If n >= 1 then return a natural number consisting of n 9's.
-    -- Otherwise, it returns 0.
-    List.repeat n '9'
+    --
+    -- Returns a natural number consisting of max(1, n), 9's.
+    --
+    List.repeat (max 1 n) '9'
         |> String.fromList
-        |> Natural.fromString
-        |> Maybe.withDefault Natural.zero
+        |> N.fromSafeString

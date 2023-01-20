@@ -4,7 +4,7 @@ import Browser as B
 import Html as H
 import Html.Attributes as HA
 import Html.Events as HE
-import Natural
+import Natural as N
 
 
 main : Program () Model Msg
@@ -58,17 +58,17 @@ view { input } =
             maybeN =
                 input
                     |> String.trim
-                    |> Natural.fromBaseBString 10
+                    |> N.fromBaseBString 10
           in
           case maybeN of
             Just n ->
                 H.div []
                     [ H.p []
-                        [ H.text <| "Binary: " ++ Natural.toBinaryString n ]
+                        [ H.text <| "Binary: " ++ N.toBinaryString n ]
                     , H.p []
-                        [ H.text <| "Octal: " ++ Natural.toOctalString n ]
+                        [ H.text <| "Octal: " ++ N.toOctalString n ]
                     , H.p []
-                        [ H.text <| "Hexadecimal: " ++ Natural.toHexString n ]
+                        [ H.text <| "Hexadecimal: " ++ N.toHexString n ]
                     ]
 
             Nothing ->
@@ -79,7 +79,7 @@ view { input } =
 viewField : String -> H.Html Msg
 viewField input =
     H.div []
-        [ H.p [] [ H.text "Please enter a non-negative integer (base 10):" ]
+        [ H.p [] [ H.text "Please enter a non-negative integer (base-10):" ]
         , H.p []
             [ H.input
                 [ HA.autofocus True

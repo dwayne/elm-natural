@@ -2,7 +2,7 @@ module Fibonacci exposing (main)
 
 import Html as H
 import Lib
-import Natural
+import Natural as N
 
 
 main : H.Html msg
@@ -30,7 +30,7 @@ viewFib n =
 
         rhs =
             Lib.fib n
-                |> Natural.toString
+                |> N.toString
                 |> H.text
     in
     H.div [] [ lhs, H.text " = ", rhs ]

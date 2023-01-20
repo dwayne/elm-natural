@@ -29,7 +29,7 @@ An Elm library for computing with the [natural numbers](https://en.wikipedia.org
 - `fromBinaryString`
 - `fromOctalString`
 - `fromHexString`
-- `fromString` (supports binary, octal, hexadecimal, and decimal)
+- `fromString` (supports binary, octal, hexadecimal, and decimal input formats)
 - `fromSafeString`
 - `fromBaseBString`
 
@@ -88,7 +88,7 @@ fact n =
       N.one
 
     else
-      N.mul n (fact (N.sub n N.one))
+      N.mul n <| fact (N.sub n N.one)
 ```
 
 And then we can use it to compute `100!`.
@@ -107,4 +107,4 @@ Many more examples can be found in the `examples/src` directory.
 ## References
 
 - Chapter 17 - Extended Precision Arithmetic of [C Interfaces and Implementations: Techniques for Creating Reusable Software](https://archive.org/details/cinterfacesimple0000hans) helped me figure out how to design, organize and build the library from the ground up.
-- [Lua Bint](https://github.com/edubart/lua-bint) inspired the examples.
+- [Lua Bint](https://github.com/edubart/lua-bint/tree/c73268472aa48554cf337c29b7550ce127f424a8#examples) inspired the examples.
