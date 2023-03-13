@@ -69,14 +69,15 @@ base =
     -- Constraints:
     --
     -- base-1 >= 36 (fromBaseBString)
-    -- base <= 2^26 (sdMul, sdDivMod)
+    -- base <= 2^26 (sdMul)
+    -- base <= 2^17 (sdDivMod)
     --
     2 ^ numBits
 
 
 numBits : Int
 numBits =
-    26
+    17
 
 
 baseMask : Int
@@ -936,9 +937,6 @@ Division by 0 is not allowed. So, for all `n : Natural`,
 
     divModBy zero n == Nothing
 
-**Note:** _The performance of this function is subpar and will be improved in a
-future release._
-
 -}
 divModBy : Natural -> Natural -> Maybe ( Natural, Natural )
 divModBy ((Natural ysLE) as y) ((Natural xsLE) as x) =
@@ -970,27 +968,159 @@ divModBy ((Natural ysLE) as y) ((Natural xsLE) as x) =
 
                 GT ->
                     let
-                        twoY =
-                            Natural <| sdMul ysLE 2 0 []
-                    in
-                    x
-                        |> divModBy twoY
-                        |> Maybe.map
-                            (\( Natural qsLE, r ) ->
-                                let
-                                    twoQsLE =
-                                        sdMul qsLE 2 0 []
-                                in
-                                if r |> isLessThan y then
-                                    ( Natural twoQsLE
-                                    , r
-                                    )
+                        n =
+                            List.length xsLE
 
-                                else
-                                    ( Natural <| sdAdd twoQsLE 1 []
-                                    , sub r y
-                                    )
-                            )
+                        m =
+                            List.length ysLE
+
+                        k =
+                            n - m
+
+                        rsBE =
+                            List.reverse xsLE
+
+                        dsLE =
+                            ysLE
+
+                        d2 =
+                            dsLE
+                                |> List.reverse
+                                |> prefix2
+
+                        ( qsLE, rsLE ) =
+                            longDivision rsBE dsLE d2 m k []
+                    in
+                    Just ( Natural qsLE, Natural rsLE )
+
+
+longDivision : List Int -> List Int -> Int -> Int -> Int -> List Int -> ( List Int, List Int )
+longDivision rsBE dsLE d2 m k qsLE =
+    --
+    -- A divide and correct method based on the algorithm described in the paper
+    -- "Multiple-Length Division Revisited: A Tour of the Minefield" by Per Brinch Hansen.
+    --
+    if k < 0 then
+        ( qsLE
+        , rsBE
+            |> removeLeadingZeros
+            |> List.reverse
+        )
+
+    else
+        let
+            j =
+                k + m + 1
+
+            z =
+                j - List.length rsBE
+
+            l =
+                3 - z
+
+            p =
+                m + 1 - z
+
+            r3 =
+                rsBE
+                    |> List.take l
+                    |> prefix3
+
+            qt0 =
+                Basics.min (r3 // d2) (base - 1)
+
+            dq0LE =
+                if qt0 == 0 then
+                    []
+
+                else if qt0 == 1 then
+                    dsLE
+
+                else
+                    sdMul dsLE qt0 0 []
+
+            dq0BE =
+                List.reverse dq0LE
+
+            rpBE =
+                List.take p rsBE
+
+            rpLE =
+                List.reverse rpBE
+
+            ( qt, dqLE ) =
+                if isSmaller rpBE p dq0BE (List.length dq0BE) then
+                    let
+                        qt1 =
+                            qt0 - 1
+                    in
+                    ( qt1
+                    , sdMul dsLE qt1 0 []
+                    )
+
+                else
+                    ( qt0
+                    , dq0LE
+                    )
+
+            rhBE =
+                subHelper rpLE dqLE 0 []
+                    |> List.reverse
+
+            rtBE =
+                List.drop p rsBE
+
+            newRsBE =
+                List.append rhBE rtBE
+        in
+        if qt == 0 && qsLE == [] then
+            longDivision newRsBE dsLE d2 m (k - 1) qsLE
+
+        else
+            longDivision newRsBE dsLE d2 m (k - 1) (qt :: qsLE)
+
+
+isSmaller : List Int -> Int -> List Int -> Int -> Bool
+isSmaller xsBE xsLen ysBE ysLen =
+    if xsLen == ysLen then
+        case compareHelper xsBE ysBE of
+            LT ->
+                True
+
+            _ ->
+                False
+
+    else
+        xsLen < ysLen
+
+
+prefix3 : List Int -> Int
+prefix3 digitsBE =
+    case digitsBE of
+        [] ->
+            0
+
+        [ d0 ] ->
+            d0
+
+        [ d1, d0 ] ->
+            d1 * base + d0
+
+        d2 :: d1 :: d0 :: _ ->
+            (d2 * base + d1) * base + d0
+
+
+prefix2 : List Int -> Int
+prefix2 digitsBE =
+    case digitsBE of
+        [] ->
+            0
+
+        [ d0 ] ->
+            d0
+
+        d1 :: d0 :: _ ->
+            d1 * base + d0
 
 
 {-| Find the quotient when the second natural number is divided by the first.
