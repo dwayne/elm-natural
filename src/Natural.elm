@@ -469,7 +469,7 @@ fromBaseBString b input =
                     -- To satisfy the assumptions of sdAdd and sdMul
                     -- we need base-1 >= b.
                     --
-                    (\char x -> sdAdd (sdMul x b 0 []) (toBaseBDigit b char) [])
+                    (\char x -> sdAdd (sdMulHelper x b 0 []) (toBaseBDigit b char) [])
                     []
                     input
 
@@ -912,7 +912,7 @@ mulHelper xsLE ysBE zsLE =
 
                 -- xsLE * y
                 addend =
-                    sdMul xsLE y 0 []
+                    sdMul xsLE y
 
                 -- (base * zsLE) + (xsLE * y)
                 partialSum =
@@ -968,6 +968,8 @@ divModBy ((Natural ysLE) as y) ((Natural xsLE) as x) =
 
                 GT ->
                     let
+                        -- 2 <= m <= n
+                        -- k >= 0
                         n =
                             List.length xsLE
 
@@ -984,9 +986,7 @@ divModBy ((Natural ysLE) as y) ((Natural xsLE) as x) =
                             ysLE
 
                         d2 =
-                            dsLE
-                                |> List.reverse
-                                |> prefix2
+                            computeD2 dsLE
 
                         ( qsLE, rsLE ) =
                             longDivision rsBE dsLE d2 m k []
@@ -1009,38 +1009,33 @@ longDivision rsBE dsLE d2 m k qsLE =
 
     else
         let
+            -- k goes from n-m to 0
+            -- j goes from n+1 to m+1
             j =
                 k + m + 1
 
+            -- z <= 3
             z =
+                -- the amount of zero padding
                 j - List.length rsBE
 
             l =
+                -- the number of leading digits to use from rsBE to form r3
                 3 - z
 
-            p =
-                m + 1 - z
-
+            -- So, suppose z = 2. Then, the zero-padded version of rsBE
+            -- = [0, 0, d, ...]. Hence, we only need to take l = 1 digit
+            -- as the prefix of rsBE.
+            --
+            -- Hence, r3 = 0 * base^2 + 0 * base + d = d.
             r3 =
                 rsBE
                     |> List.take l
                     |> prefix3
 
-            qt0 =
-                Basics.min (r3 // d2) (base - 1)
-
-            dq0LE =
-                if qt0 == 0 then
-                    []
-
-                else if qt0 == 1 then
-                    dsLE
-
-                else
-                    sdMul dsLE qt0 0 []
-
-            dq0BE =
-                List.reverse dq0LE
+            p =
+                -- the number of leading digits to use from rsBE to form rpBE
+                m + 1 - z
 
             rpBE =
                 List.take p rsBE
@@ -1048,14 +1043,33 @@ longDivision rsBE dsLE d2 m k qsLE =
             rpLE =
                 List.reverse rpBE
 
-            ( qt, dqLE ) =
-                if isSmaller rpBE p dq0BE (List.length dq0BE) then
+            qt0 =
+                -- the first estimation
+                Basics.min (r3 // d2) baseMask
+
+            dq0LE =
+                sdMul dsLE qt0
+
+            ( dq0BE, dq0Len ) =
+                ( List.reverse dq0LE
+                , List.length dq0LE
+                )
+
+            ( qk, dqLE ) =
+                if isSmaller rpBE p dq0BE dq0Len then
+                    -- We need to adjust the estimate.
+                    --
+                    -- The cool thing about this algorithm is that if our first
+                    -- estimate is ever incorrect then the adjusted value is
+                    -- correct.
+                    --
+                    -- Read the paper to see the proof.
                     let
                         qt1 =
                             qt0 - 1
                     in
                     ( qt1
-                    , sdMul dsLE qt1 0 []
+                    , sdMul dsLE qt1
                     )
 
                 else
@@ -1073,11 +1087,11 @@ longDivision rsBE dsLE d2 m k qsLE =
             newRsBE =
                 List.append rhBE rtBE
         in
-        if qt == 0 && qsLE == [] then
+        if qk == 0 && qsLE == [] then
             longDivision newRsBE dsLE d2 m (k - 1) qsLE
 
         else
-            longDivision newRsBE dsLE d2 m (k - 1) (qt :: qsLE)
+            longDivision newRsBE dsLE d2 m (k - 1) (qk :: qsLE)
 
 
 isSmaller : List Int -> Int -> List Int -> Int -> Bool
@@ -1110,17 +1124,17 @@ prefix3 digitsBE =
             (d2 * base + d1) * base + d0
 
 
-prefix2 : List Int -> Int
-prefix2 digitsBE =
-    case digitsBE of
-        [] ->
-            0
-
-        [ d0 ] ->
-            d0
-
+computeD2 : List Int -> Int
+computeD2 digitsLE =
+    --
+    -- Assumes |digitsLE| >= 2.
+    --
+    case List.reverse digitsLE of
         d1 :: d0 :: _ ->
             d1 * base + d0
+
+        _ ->
+            0
 
 
 {-| Find the quotient when the second natural number is divided by the first.
@@ -1451,8 +1465,24 @@ sdAdd xs y zs =
             sdAdd restXs carry (z :: zs)
 
 
-sdMul : List Int -> Int -> Int -> List Int -> List Int
-sdMul xs y carry zs =
+sdMul : List Int -> Int -> List Int
+sdMul xs y =
+    case ( xs, y ) of
+        ( [], _ ) ->
+            []
+
+        ( _, 0 ) ->
+            []
+
+        ( _, 1 ) ->
+            xs
+
+        _ ->
+            sdMulHelper xs y 0 []
+
+
+sdMulHelper : List Int -> Int -> Int -> List Int -> List Int
+sdMulHelper xs y carry zs =
     --
     -- zs = xs * y + carry
     --
@@ -1497,7 +1527,7 @@ sdMul xs y carry zs =
                 ( newCarry, z ) =
                     iDivModBy base product
             in
-            sdMul restXs y newCarry (z :: zs)
+            sdMulHelper restXs y newCarry (z :: zs)
 
 
 sdDivMod : List Int -> Int -> List Int -> Int -> ( List Int, Int )
