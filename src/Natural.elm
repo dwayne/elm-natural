@@ -979,19 +979,52 @@ divModBy ((Natural ysLE) as y) ((Natural xsLE) as x) =
                         k =
                             n - m
 
+                        f =
+                            computeScaleFactor ysLE
+
                         rsBE =
-                            List.reverse xsLE
+                            sdMul xsLE f
+                                |> List.reverse
 
                         dsLE =
-                            ysLE
+                            sdMul ysLE f
 
                         d2 =
                             computeD2 dsLE
 
-                        ( qsLE, rsLE ) =
+                        ( qsLE, rsScaledLE ) =
                             longDivision rsBE dsLE d2 m k []
+
+                        ( rsLE, _ ) =
+                            sdDivMod rsScaledLE f [] 0
                     in
                     Just ( Natural qsLE, Natural rsLE )
+
+
+computeScaleFactor : List Int -> Int
+computeScaleFactor digitsLE =
+    --
+    -- Assumes |digitsLE| >= 1
+    --
+    case List.reverse digitsLE of
+        d :: _ ->
+            base // (d + 1)
+
+        _ ->
+            0
+
+
+computeD2 : List Int -> Int
+computeD2 digitsLE =
+    --
+    -- Assumes |digitsLE| >= 2.
+    --
+    case List.reverse digitsLE of
+        d1 :: d0 :: _ ->
+            d1 * base + d0
+
+        _ ->
+            0
 
 
 longDivision : List Int -> List Int -> Int -> Int -> Int -> List Int -> ( List Int, List Int )
@@ -1122,19 +1155,6 @@ prefix3 digitsBE =
 
         d2 :: d1 :: d0 :: _ ->
             (d2 * base + d1) * base + d0
-
-
-computeD2 : List Int -> Int
-computeD2 digitsLE =
-    --
-    -- Assumes |digitsLE| >= 2.
-    --
-    case List.reverse digitsLE of
-        d1 :: d0 :: _ ->
-            d1 * base + d0
-
-        _ ->
-            0
 
 
 {-| Find the quotient when the second natural number is divided by the first.
