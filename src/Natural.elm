@@ -979,39 +979,19 @@ divModBy ((Natural ysLE) as y) ((Natural xsLE) as x) =
                         k =
                             n - m
 
-                        f =
-                            computeScaleFactor ysLE
-
                         rsBE =
-                            sdMul xsLE f
-                                |> List.reverse
+                            List.reverse xsLE
 
                         dsLE =
-                            sdMul ysLE f
+                            ysLE
 
                         d2 =
                             computeD2 dsLE
 
-                        ( qsLE, rsScaledLE ) =
+                        ( qsLE, rsLE ) =
                             longDivision rsBE dsLE d2 m k []
-
-                        ( rsLE, _ ) =
-                            sdDivMod rsScaledLE f [] 0
                     in
                     Just ( Natural qsLE, Natural rsLE )
-
-
-computeScaleFactor : List Int -> Int
-computeScaleFactor digitsLE =
-    --
-    -- Assumes |digitsLE| >= 1
-    --
-    case List.reverse digitsLE of
-        d :: _ ->
-            base // (d + 1)
-
-        _ ->
-            0
 
 
 computeD2 : List Int -> Int
@@ -1127,20 +1107,6 @@ longDivision rsBE dsLE d2 m k qsLE =
             longDivision newRsBE dsLE d2 m (k - 1) (qk :: qsLE)
 
 
-isSmaller : List Int -> Int -> List Int -> Int -> Bool
-isSmaller xsBE xsLen ysBE ysLen =
-    if xsLen == ysLen then
-        case compareHelper xsBE ysBE of
-            LT ->
-                True
-
-            _ ->
-                False
-
-    else
-        xsLen < ysLen
-
-
 prefix3 : List Int -> Int
 prefix3 digitsBE =
     case digitsBE of
@@ -1155,6 +1121,20 @@ prefix3 digitsBE =
 
         d2 :: d1 :: d0 :: _ ->
             (d2 * base + d1) * base + d0
+
+
+isSmaller : List Int -> Int -> List Int -> Int -> Bool
+isSmaller xsBE xsLen ysBE ysLen =
+    if xsLen == ysLen then
+        case compareHelper xsBE ysBE of
+            LT ->
+                True
+
+            _ ->
+                False
+
+    else
+        xsLen < ysLen
 
 
 {-| Find the quotient when the second natural number is divided by the first.
