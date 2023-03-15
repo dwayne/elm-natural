@@ -1145,9 +1145,6 @@ Division by 0 is not allowed. So, for all `n : Natural`,
 
     divModBy zero n == Nothing
 
-**Note:** _The performance of this function is subpar and will be improved in a
-future release._
-
 -}
 divBy : Natural -> Natural -> Maybe Natural
 divBy divisor =
@@ -1164,9 +1161,6 @@ divBy divisor =
 Modulo by 0 is not allowed. So, for all `n : Natural`,
 
     modBy zero n == Nothing
-
-**Note:** _The performance of this function is subpar and will be improved in a
-future release._
 
 -}
 modBy : Natural -> Natural -> Maybe Natural
