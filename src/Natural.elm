@@ -469,7 +469,7 @@ fromBaseBString b input =
                     -- To satisfy the assumptions of sdAdd and sdMul
                     -- we need base-1 >= b.
                     --
-                    (\char x -> sdAdd (sdMulLE x b) (toBaseBDigit b char) [])
+                    (\char x -> sdAdd (sdMulLE x b) (toBaseBDigit b char))
                     []
                     input
 
@@ -1429,32 +1429,48 @@ isBaseB b =
 -- SINGLE-DIGIT OPERATIONS
 
 
-sdAdd : List Int -> Int -> List Int -> List Int
-sdAdd xs y zs =
+sdAdd : List Int -> Int -> List Int
+sdAdd xsLE y =
+    case ( xsLE, y ) of
+        ( _, 0 ) ->
+            xsLE
+
+        ( [], _ ) ->
+            [ y ]
+
+        _ ->
+            sdAddHelper xsLE y []
+
+
+sdAddHelper : List Int -> Int -> List Int -> List Int
+sdAddHelper xsLE y zsBE =
     --
-    -- zs = xs + y
+    -- zsBE = xsLE + y
     --
-    -- Assumptions
+    -- Preconditions:
     --
-    -- 1. xs = [ x_0, x_1, ..., x_n ] (LE) and 0 <= xi <= base-1
-    -- 2. 0 <= y <= base-1
-    -- 3. zs = [ z_m, ..., z_1, z_0 ] (BE) and 0 <= zj <= base-1
+    -- - xsLE = [ x_0, x_1, ..., x_n ] and 0 <= x_i <= base-1
+    -- - 0 <= y <= base-1
     --
-    case xs of
+    -- Postconditions:
+    --
+    -- - zsBE = [ z_m, ..., z_1, z_0 ] and 0 <= z_j <= base-1
+    --
+    case xsLE of
         [] ->
             List.reverse <|
                 if y == 0 then
-                    zs
+                    zsBE
 
                 else
-                    y :: zs
+                    y :: zsBE
 
-        x :: restXs ->
+        x :: restXsLE ->
             let
                 ( carry, z ) =
-                    iDivModBy base (x + y)
+                    (x + y) |> iDivModBy base
             in
-            sdAdd restXs carry (z :: zs)
+            sdAddHelper restXsLE carry (z :: zsBE)
 
 
 sdMulLE : List Int -> Int -> List Int
