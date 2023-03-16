@@ -6,6 +6,7 @@ pkgs.mkShell {
     pkgs.elmPackages.elm
     pkgs.elmPackages.elm-doc-preview
     pkgs.elmPackages.elm-format
+    pkgs.elmPackages.elm-optimize-level-2
     pkgs.elmPackages.elm-test
     pkgs.nodejs-18_x
     pkgs.racket

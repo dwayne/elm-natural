@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 cd "$project/benchmarks" && \
-  elm make Main.elm --output index.html --optimize
+  elm-optimize-level-2 Main.elm --optimize-speed --output benchmarks.js
