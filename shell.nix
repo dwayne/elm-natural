@@ -4,6 +4,7 @@ in
 pkgs.mkShell {
   packages = [
     pkgs.elmPackages.elm
+    pkgs.elmPackages.elm-optimize-level-2
     pkgs.elmPackages.elm-test
     pkgs.racket
   ];
