@@ -469,7 +469,7 @@ fromBaseBString b input =
                     -- To satisfy the assumptions of sdAdd and sdMul
                     -- we need base-1 >= b.
                     --
-                    (\char x -> sdAdd (sdMulHelper x b 0 []) (toBaseBDigit b char) [])
+                    (\char x -> sdAdd (sdMulLE x b) (toBaseBDigit b char) [])
                     []
                     input
 
@@ -912,7 +912,7 @@ mulHelper xsLE ysBE zsLE =
 
                 -- xsLE * y
                 addend =
-                    sdMul xsLE y
+                    sdMulLE xsLE y
 
                 -- (base * zsLE) + (xsLE * y)
                 partialSum =
@@ -1060,13 +1060,11 @@ longDivision rsBE dsLE d2 m k qsLE =
                 -- the first estimation
                 Basics.min (r3 // d2) baseMask
 
-            dq0LE =
-                sdMul dsLE qt0
+            dq0BE =
+                sdMulBE dsLE qt0
 
-            ( dq0BE, dq0Len ) =
-                ( List.reverse dq0LE
-                , List.length dq0LE
-                )
+            dq0Len =
+                List.length dq0BE
 
             ( qk, dqLE ) =
                 if isSmaller rpBE p dq0BE dq0Len then
@@ -1082,12 +1080,12 @@ longDivision rsBE dsLE d2 m k qsLE =
                             qt0 - 1
                     in
                     ( qt1
-                    , sdMul dsLE qt1
+                    , sdMulLE dsLE qt1
                     )
 
                 else
                     ( qt0
-                    , dq0LE
+                    , List.reverse dq0BE
                     )
 
             rhBE =
@@ -1459,9 +1457,9 @@ sdAdd xs y zs =
             sdAdd restXs carry (z :: zs)
 
 
-sdMul : List Int -> Int -> List Int
-sdMul xs y =
-    case ( xs, y ) of
+sdMulLE : List Int -> Int -> List Int
+sdMulLE xsLE y =
+    case ( xsLE, y ) of
         ( [], _ ) ->
             []
 
@@ -1469,34 +1467,53 @@ sdMul xs y =
             []
 
         ( _, 1 ) ->
-            xs
+            xsLE
 
         _ ->
-            sdMulHelper xs y 0 []
+            sdMulBEHelper xsLE y 0 []
+                |> List.reverse
 
 
-sdMulHelper : List Int -> Int -> Int -> List Int -> List Int
-sdMulHelper xs y carry zs =
+sdMulBE : List Int -> Int -> List Int
+sdMulBE xsLE y =
+    case ( xsLE, y ) of
+        ( [], _ ) ->
+            []
+
+        ( _, 0 ) ->
+            []
+
+        ( _, 1 ) ->
+            List.reverse xsLE
+
+        _ ->
+            sdMulBEHelper xsLE y 0 []
+
+
+sdMulBEHelper : List Int -> Int -> Int -> List Int -> List Int
+sdMulBEHelper xsLE y carry zsBE =
     --
-    -- zs = xs * y + carry
+    -- zsBE = xsLE * y + carry
     --
-    -- Assumptions
+    -- Preconditions:
     --
-    -- 1. xs = [ x_0, x_1, ..., x_n ] (LE) and 0 <= xi <= base-1
-    -- 2. 0 <= y <= base-1
-    -- 3. 0 <= carry <= base-2
-    -- 4. zs = [ z_m, ..., z_1, z_0 ] (BE) and 0 <= zj <= base-1
+    -- - xsLE = [ x_0, x_1, ..., x_n ] and 0 <= x_i <= base-1
+    -- - 0 <= y <= base-1
+    -- - 0 <= carry <= base-2
     --
-    case xs of
+    -- Postconditions:
+    --
+    -- - zsBE = [ z_m, ..., z_1, z_0 ] and 0 <= z_j <= base-1
+    --
+    case xsLE of
         [] ->
-            List.reverse <|
-                if carry == 0 then
-                    zs
+            if carry == 0 then
+                zsBE
 
-                else
-                    carry :: zs
+            else
+                carry :: zsBE
 
-        x :: restXs ->
+        x :: restXsLE ->
             let
                 -- product constrains how large the base can be.
                 --
@@ -1519,9 +1536,9 @@ sdMulHelper xs y carry zs =
                     x * y + carry
 
                 ( newCarry, z ) =
-                    iDivModBy base product
+                    product |> iDivModBy base
             in
-            sdMulHelper restXs y newCarry (z :: zs)
+            sdMulBEHelper restXsLE y newCarry (z :: zsBE)
 
 
 sdDivMod : List Int -> Int -> List Int -> Int -> ( List Int, Int )
