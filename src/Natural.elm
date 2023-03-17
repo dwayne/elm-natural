@@ -462,6 +462,7 @@ If `b = 36` then the valid base-36 digits are `[0-9a-zA-Z]`.
 -}
 fromBaseBString : Int -> String -> Maybe Natural
 fromBaseBString b input =
+    -- TODO: Explore chunking for efficiency reasons.
     if isBaseB b && isBaseBString b input then
         Just <|
             Natural <|
@@ -1380,6 +1381,7 @@ base-`b` digits._
 -}
 toBaseBString : Int -> Natural -> Maybe String
 toBaseBString b (Natural xs) =
+    -- TODO: Explore chunking for efficiency reasons.
     if isBaseB b then
         Just <| toBaseBStringHelper b xs ""
 
@@ -1431,6 +1433,12 @@ isBaseB b =
 
 sdAdd : List Int -> Int -> List Int
 sdAdd xsLE y =
+    --
+    -- TODO: Find improvements.
+    --
+    -- 1. Determine if we really need to use iDivModBy.
+    -- 2. Once y becomes 0 in sdAddHelper we should be able to stop adding
+    --    and return the result.
     case ( xsLE, y ) of
         ( _, 0 ) ->
             xsLE
