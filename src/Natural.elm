@@ -69,8 +69,8 @@ base =
     -- Constraints:
     --
     -- base-1 >= 36 (fromBaseBString)
-    -- base <= 2^26 (sdMul)
-    -- base <= 2^17 (sdDivMod)
+    -- base <= 2^26 (sdMul, sdDivMod)
+    -- base <= 2^17 (prefix3)
     --
     2 ^ numBits
 
@@ -885,7 +885,83 @@ subHelper xsLE ysLE carry zsBE =
 -}
 mul : Natural -> Natural -> Natural
 mul (Natural xsLE) (Natural ysLE) =
-    Natural <| mulHelper xsLE (List.reverse ysLE) []
+    Natural <| karatsuba xsLE ysLE
+
+
+karatsuba : List Int -> List Int -> List Int
+karatsuba xsLE ysLE =
+    case ( xsLE, ysLE ) of
+        ( [], _ ) ->
+            []
+
+        ( _, [] ) ->
+            []
+
+        ( [ 1 ], _ ) ->
+            ysLE
+
+        ( _, [ 1 ] ) ->
+            xsLE
+
+        _ ->
+            let
+                xLen =
+                    List.length xsLE
+
+                yLen =
+                    List.length ysLE
+            in
+            if xLen < 1000 || yLen < 1000 then
+                mulHelper xsLE (List.reverse ysLE) []
+
+            else
+                let
+                    n =
+                        Basics.max xLen yLen
+
+                    m =
+                        n // 2
+
+                    m2 =
+                        2 * m
+
+                    ( x0, x1 ) =
+                        splitAt m xsLE
+
+                    ( y0, y1 ) =
+                        splitAt m ysLE
+
+                    z0 =
+                        -- x0y0 = x0 * y0
+                        karatsuba x0 y0
+
+                    z2 =
+                        -- x1y1 = x1 * y1
+                        karatsuba x1 y1
+
+                    t1 =
+                        -- (x0 + x1)(y0 + y1)
+                        karatsuba
+                            (addHelper x0 x1 0 [])
+                            (addHelper y0 y1 0 [])
+
+                    t2 =
+                        -- (x0 + x1)(y0 + y1) - x0y0
+                        subHelper t1 z0 0 []
+
+                    z1 =
+                        -- (x0 + x1)(y0 + y1) - x0y0 - x1y1
+                        subHelper t2 z2 0 []
+
+                    t3 =
+                        -- z1 * base^m + z0
+                        addHelper (shiftLeftBy m z1) z0 0 []
+
+                    xy =
+                        -- z2 * base^2m + z1 * base^m + z0
+                        addHelper (shiftLeftBy m2 z2) t3 0 []
+                in
+                xy
 
 
 mulHelper : List Int -> List Int -> List Int -> List Int
@@ -920,6 +996,25 @@ mulHelper xsLE ysBE zsLE =
                     addHelper augend addend 0 []
             in
             mulHelper xsLE restYsBE partialSum
+
+
+shiftLeftBy : Int -> List Int -> List Int
+shiftLeftBy n digitsLE =
+    case digitsLE of
+        [] ->
+            []
+
+        _ ->
+            shiftLeftByHelper n digitsLE
+
+
+shiftLeftByHelper : Int -> List Int -> List Int
+shiftLeftByHelper n digitsLE =
+    if n == 0 then
+        digitsLE
+
+    else
+        shiftLeftByHelper (n - 1) (0 :: digitsLE)
 
 
 {-| Find the quotient and remainder when the second natural number is divided by
@@ -1655,3 +1750,10 @@ removeLeadingZeros digits =
 
             else
                 digits
+
+
+splitAt : Int -> List Int -> ( List Int, List Int )
+splitAt n list =
+    ( List.take n list
+    , List.drop n list
+    )
