@@ -70,14 +70,13 @@ base =
     --
     -- base-1 >= 36 (fromBaseBString)
     -- base <= 2^26 (sdMul, sdDivMod)
-    -- base <= 2^17 (prefix3)
     --
     2 ^ numBits
 
 
 numBits : Int
 numBits =
-    17
+    26
 
 
 baseMask : Int
@@ -541,12 +540,17 @@ toBaseBDigit b char =
 -}
 compare : Natural -> Natural -> Order
 compare (Natural xsLE) (Natural ysLE) =
-    let
-        xsLen =
-            List.length xsLE
+    compareLE xsLE ysLE
 
-        ysLen =
-            List.length ysLE
+
+compareLE : List Int -> List Int -> Order
+compareLE xsLE ysLE =
+    let
+        ( xsLen, xsBE ) =
+            lengthAndReverse xsLE
+
+        ( ysLen, ysBE ) =
+            lengthAndReverse ysLE
     in
     if xsLen < ysLen then
         LT
@@ -555,11 +559,11 @@ compare (Natural xsLE) (Natural ysLE) =
         GT
 
     else
-        compareHelper (List.reverse xsLE) (List.reverse ysLE)
+        compareEqualLengthBE xsBE ysBE
 
 
-compareHelper : List Int -> List Int -> Order
-compareHelper xsBE ysBE =
+compareEqualLengthBE : List Int -> List Int -> Order
+compareEqualLengthBE xsBE ysBE =
     --
     -- Assumptions
     --
@@ -575,7 +579,7 @@ compareHelper xsBE ysBE =
                 GT
 
             else
-                compareHelper restXsBE restYsBE
+                compareEqualLengthBE restXsBE restYsBE
 
         _ ->
             EQ
@@ -1032,7 +1036,7 @@ Division by 0 is not allowed. So, for all `n : Natural`,
 
 -}
 divModBy : Natural -> Natural -> Maybe ( Natural, Natural )
-divModBy ((Natural ysLE) as y) ((Natural xsLE) as x) =
+divModBy (Natural ysLE) ((Natural xsLE) as x) =
     case ysLE of
         [] ->
             Nothing
@@ -1052,7 +1056,7 @@ divModBy ((Natural ysLE) as y) ((Natural xsLE) as x) =
                 )
 
         _ ->
-            case compare x y of
+            case compareLE xsLE ysLE of
                 LT ->
                     Just ( zero, x )
 
@@ -1063,45 +1067,43 @@ divModBy ((Natural ysLE) as y) ((Natural xsLE) as x) =
                     let
                         -- 2 <= m <= n
                         -- k >= 0
-                        n =
-                            List.length xsLE
+                        ( n, rsBE ) =
+                            lengthAndReverse xsLE
 
-                        m =
-                            List.length ysLE
+                        ( m, dsBE ) =
+                            lengthAndReverse ysLE
 
                         k =
                             n - m
 
-                        rsBE =
-                            List.reverse xsLE
-
-                        dsLE =
-                            ysLE
-
-                        d2 =
-                            computeD2 dsLE
+                        ( d2, d2LE ) =
+                            computeD2 dsBE
 
                         ( qsLE, rsLE ) =
-                            longDivision rsBE dsLE d2 m k []
+                            longDivision rsBE ysLE d2 d2LE m k []
                     in
                     Just ( Natural qsLE, Natural rsLE )
 
 
-computeD2 : List Int -> Int
-computeD2 digitsLE =
+computeD2 : List Int -> ( Int, List Int )
+computeD2 digitsBE =
     --
-    -- Assumes |digitsLE| >= 2.
+    -- Assumes |digitsBE| >= 2.
     --
-    case List.reverse digitsLE of
+    case digitsBE of
         d1 :: d0 :: _ ->
-            d1 * base + d0
+            ( d1 * base + d0
+            , [ d0, d1 ]
+            )
 
         _ ->
-            0
+            ( 0
+            , []
+            )
 
 
-longDivision : List Int -> List Int -> Int -> Int -> Int -> List Int -> ( List Int, List Int )
-longDivision rsBE dsLE d2 m k qsLE =
+longDivision : List Int -> List Int -> Int -> List Int -> Int -> Int -> List Int -> ( List Int, List Int )
+longDivision rsBE dsLE d2 d2LE m k qsLE =
     --
     -- A divide and correct method based on the algorithm described in the paper
     -- "Multiple-Length Division Revisited: A Tour of the Minefield" by Per Brinch Hansen.
@@ -1150,8 +1152,7 @@ longDivision rsBE dsLE d2 m k qsLE =
                 List.reverse rpBE
 
             qt0 =
-                -- the first estimation
-                Basics.min (r3 // d2) baseMask
+                computeFirstEstimation r3 d2 d2LE
 
             dq0BE =
                 sdMulBE dsLE qt0
@@ -1192,32 +1193,89 @@ longDivision rsBE dsLE d2 m k qsLE =
                 List.append rhBE rtBE
         in
         if qk == 0 && qsLE == [] then
-            longDivision newRsBE dsLE d2 m (k - 1) qsLE
+            longDivision newRsBE dsLE d2 d2LE m (k - 1) qsLE
 
         else
-            longDivision newRsBE dsLE d2 m (k - 1) (qk :: qsLE)
+            longDivision newRsBE dsLE d2 d2LE m (k - 1) (qk :: qsLE)
 
 
-prefix3 : List Int -> Int
+type Prefix3
+    = P3Single Int
+    | P3Multi (List Int)
+
+
+prefix3 : List Int -> Prefix3
 prefix3 digitsBE =
     case digitsBE of
         [] ->
-            0
+            P3Single 0
 
         [ d0 ] ->
-            d0
+            P3Single d0
 
         [ d1, d0 ] ->
-            d1 * base + d0
+            P3Single (d1 * base + d0)
+
+        0 :: d1 :: d0 :: _ ->
+            P3Single (d1 * base + d0)
 
         d2 :: d1 :: d0 :: _ ->
-            (d2 * base + d1) * base + d0
+            P3Multi [ d0, d1, d2 ]
+
+
+computeFirstEstimation : Prefix3 -> Int -> List Int -> Int
+computeFirstEstimation r3 d2 d2LE =
+    case r3 of
+        P3Single x ->
+            Basics.min (x // d2) baseMask
+
+        P3Multi xsLE ->
+            case xsLE |> slowDivModBy d2LE of
+                ( [], _ ) ->
+                    0
+
+                ( [ qk ], _ ) ->
+                    qk
+
+                _ ->
+                    baseMask
+
+
+slowDivModBy : List Int -> List Int -> ( List Int, List Int )
+slowDivModBy ysLE xsLE =
+    case compareLE xsLE ysLE of
+        LT ->
+            ( [], xsLE )
+
+        EQ ->
+            ( [ 1 ], [] )
+
+        GT ->
+            let
+                twoYLE =
+                    sdMulLE ysLE 2
+
+                ( qsLE, rLE ) =
+                    xsLE |> slowDivModBy twoYLE
+
+                twoQsLE =
+                    sdMulLE qsLE 2
+            in
+            if compareLE rLE ysLE == LT then
+                ( twoQsLE
+                , rLE
+                )
+
+            else
+                ( sdAdd twoQsLE 1
+                , subHelper rLE ysLE 0 []
+                )
 
 
 isSmaller : List Int -> Int -> List Int -> Int -> Bool
 isSmaller xsBE xsLen ysBE ysLen =
     if xsLen == ysLen then
-        case compareHelper xsBE ysBE of
+        case compareEqualLengthBE xsBE ysBE of
             LT ->
                 True
 
@@ -1728,6 +1786,21 @@ quotientModBy divisor dividend =
     ( floor (toFloat dividend / toFloat divisor)
     , Basics.modBy divisor dividend
     )
+
+
+lengthAndReverse : List a -> ( Int, List a )
+lengthAndReverse list =
+    lengthAndReverseHelper list 0 []
+
+
+lengthAndReverseHelper : List a -> Int -> List a -> ( Int, List a )
+lengthAndReverseHelper list n revList =
+    case list of
+        [] ->
+            ( n, revList )
+
+        x :: restList ->
+            lengthAndReverseHelper restList (n + 1) (x :: revList)
 
 
 padLeft : Int -> a -> List a -> List a

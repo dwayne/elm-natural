@@ -16,6 +16,7 @@ benchmarks =
         [ multiplicationBenchmarks
         , divisionWithRemainderBenchmarks
         , exponentiationBenchmarks
+        , comparisonBenchmarks
         ]
 
 
@@ -58,6 +59,25 @@ exponentiationBenchmarks =
           benchmark "2 ^ 1000" <|
             \_ ->
                 N.exp N.two oneThousand
+        ]
+
+
+comparisonBenchmarks : Benchmark
+comparisonBenchmarks =
+    describe "compare"
+        [ let
+            tenThousandBase26Digits =
+                N.exp (N.exp N.two (N.fromSafeInt 26)) (N.fromSafeInt 9999)
+
+            a =
+                N.sub tenThousandBase26Digits N.one
+
+            b =
+                N.sub tenThousandBase26Digits N.two
+          in
+          benchmark "compare (2^26)^9999-1 and (2^26)^9999-2" <|
+            \_ ->
+                N.compare a b
         ]
 
 
