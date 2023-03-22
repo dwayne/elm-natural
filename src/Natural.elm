@@ -956,12 +956,9 @@ karatsuba xsLE ysLE =
                     t3 =
                         -- z1 * base^m + z0
                         addHelper (shiftLeftBy m z1) z0 0 []
-
-                    xy =
-                        -- z2 * base^2m + z1 * base^m + z0
-                        addHelper (shiftLeftBy m2 z2) t3 0 []
                 in
-                xy
+                -- xy = z2 * base^2m + z1 * base^m + z0
+                addHelper (shiftLeftBy m2 z2) t3 0 []
 
 
 mulHelper : List Int -> List Int -> List Int -> List Int
