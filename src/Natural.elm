@@ -469,7 +469,7 @@ fromBaseBString b input =
                     -- To satisfy the assumptions of sdAdd and sdMul
                     -- we need base-1 >= b.
                     --
-                    (\char x -> sdAdd (sdMulLE x b) (toBaseBDigit b char))
+                    (\char x -> sdAdd (sdMul x b) (toBaseBDigit b char))
                     []
                     input
 
@@ -545,44 +545,27 @@ compare (Natural xsLE) (Natural ysLE) =
 
 compareLE : List Int -> List Int -> Order
 compareLE xsLE ysLE =
-    let
-        ( xsLen, xsBE ) =
-            lengthAndReverse xsLE
-
-        ( ysLen, ysBE ) =
-            lengthAndReverse ysLE
-    in
-    if xsLen < ysLen then
-        LT
-
-    else if xsLen > ysLen then
-        GT
-
-    else
-        compareEqualLengthBE xsBE ysBE
+    compareLEHelper 0 0 xsLE ysLE
 
 
-compareEqualLengthBE : List Int -> List Int -> Order
-compareEqualLengthBE xsBE ysBE =
-    --
-    -- Assumptions
-    --
-    -- 1. xsBE = [ x_n, ..., x_1, x_0 ] (BE) and 0 <= xi <= base-1
-    -- 2. ysBE = [ y_n, ..., y_1, y_0 ] (BE) and 0 <= yi <= base-1
-    --
-    case ( xsBE, ysBE ) of
-        ( x :: restXsBE, y :: restYsBE ) ->
-            if x < y then
-                LT
+compareLEHelper : Int -> Int -> List Int -> List Int -> Order
+compareLEHelper a b xsLE ysLE =
+    case ( xsLE, ysLE ) of
+        ( [], [] ) ->
+            Basics.compare a b
 
-            else if x > y then
-                GT
+        ( [], _ ) ->
+            LT
+
+        ( _, [] ) ->
+            GT
+
+        ( x :: xsLERest, y :: ysLERest ) ->
+            if x == y then
+                compareLEHelper a b xsLERest ysLERest
 
             else
-                compareEqualLengthBE restXsBE restYsBE
-
-        _ ->
-            EQ
+                compareLEHelper x y xsLERest ysLERest
 
 
 {-| Determine if the second natural number is less than the first.
@@ -990,7 +973,7 @@ mulHelper xsLE ysBE zsLE =
 
                 -- xsLE * y
                 addend =
-                    sdMulLE xsLE y
+                    sdMul xsLE y
 
                 -- (base * zsLE) + (xsLE * y)
                 partialSum =
@@ -1154,14 +1137,11 @@ longDivision rsBE dsLE d2 d2LE m k qsLE =
             qt0 =
                 computeFirstEstimation r3 d2 d2LE
 
-            dq0BE =
-                sdMulBE dsLE qt0
-
-            dq0Len =
-                List.length dq0BE
+            dq0LE =
+                sdMul dsLE qt0
 
             ( qk, dqLE ) =
-                if isSmaller rpBE p dq0BE dq0Len then
+                if compareLE rpLE dq0LE == LT then
                     -- We need to adjust the estimate.
                     --
                     -- The cool thing about this algorithm is that if our first
@@ -1174,12 +1154,12 @@ longDivision rsBE dsLE d2 d2LE m k qsLE =
                             qt0 - 1
                     in
                     ( qt1
-                    , sdMulLE dsLE qt1
+                    , sdMul dsLE qt1
                     )
 
                 else
                     ( qt0
-                    , List.reverse dq0BE
+                    , dq0LE
                     )
 
             rhBE =
@@ -1253,13 +1233,13 @@ slowDivModBy ysLE xsLE =
         GT ->
             let
                 twoYLE =
-                    sdMulLE ysLE 2
+                    sdMul ysLE 2
 
                 ( qsLE, rLE ) =
                     xsLE |> slowDivModBy twoYLE
 
                 twoQsLE =
-                    sdMulLE qsLE 2
+                    sdMul qsLE 2
             in
             if compareLE rLE ysLE == LT then
                 ( twoQsLE
@@ -1270,20 +1250,6 @@ slowDivModBy ysLE xsLE =
                 ( sdAdd twoQsLE 1
                 , subHelper rLE ysLE 0 []
                 )
-
-
-isSmaller : List Int -> Int -> List Int -> Int -> Bool
-isSmaller xsBE xsLen ysBE ysLen =
-    if xsLen == ysLen then
-        case compareEqualLengthBE xsBE ysBE of
-            LT ->
-                True
-
-            _ ->
-                False
-
-    else
-        xsLen < ysLen
 
 
 {-| Find the quotient when the second natural number is divided by the first.
@@ -1631,8 +1597,8 @@ sdAddHelper xsLE y zsBE =
             sdAddHelper restXsLE carry (z :: zsBE)
 
 
-sdMulLE : List Int -> Int -> List Int
-sdMulLE xsLE y =
+sdMul : List Int -> Int -> List Int
+sdMul xsLE y =
     case ( xsLE, y ) of
         ( [], _ ) ->
             []
@@ -1644,28 +1610,12 @@ sdMulLE xsLE y =
             xsLE
 
         _ ->
-            sdMulBEHelper xsLE y 0 []
+            sdMulHelper xsLE y 0 []
                 |> List.reverse
 
 
-sdMulBE : List Int -> Int -> List Int
-sdMulBE xsLE y =
-    case ( xsLE, y ) of
-        ( [], _ ) ->
-            []
-
-        ( _, 0 ) ->
-            []
-
-        ( _, 1 ) ->
-            List.reverse xsLE
-
-        _ ->
-            sdMulBEHelper xsLE y 0 []
-
-
-sdMulBEHelper : List Int -> Int -> Int -> List Int -> List Int
-sdMulBEHelper xsLE y carry zsBE =
+sdMulHelper : List Int -> Int -> Int -> List Int -> List Int
+sdMulHelper xsLE y carry zsBE =
     --
     -- zsBE = xsLE * y + carry
     --
@@ -1712,7 +1662,7 @@ sdMulBEHelper xsLE y carry zsBE =
                 ( newCarry, z ) =
                     product |> iDivModBy base
             in
-            sdMulBEHelper restXsLE y newCarry (z :: zsBE)
+            sdMulHelper restXsLE y newCarry (z :: zsBE)
 
 
 sdDivMod : List Int -> Int -> List Int -> Int -> ( List Int, Int )
