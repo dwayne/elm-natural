@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cd "$project/benchmarks" && \
+  elm-optimize-level-2 BigIntBenchmarks.elm --optimize-speed --output benchmarks2.js

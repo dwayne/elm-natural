@@ -1,8 +1,8 @@
-module Main exposing (main)
+module BigIntBenchmarks exposing (main)
 
 import Benchmark exposing (Benchmark, benchmark, describe)
 import Benchmark.Runner as BR
-import Natural as N exposing (Natural)
+import BigInt exposing (BigInt)
 
 
 main : BR.BenchmarkProgram
@@ -12,7 +12,7 @@ main =
 
 benchmarks : Benchmark
 benchmarks =
-    describe "Natural"
+    describe "BigInt"
         [ multiplicationBenchmarks
         , divisionWithRemainderBenchmarks
         , exponentiationBenchmarks
@@ -29,7 +29,7 @@ multiplicationBenchmarks =
           in
           benchmark "999..9 (100 9's) * 999..9 (100 9's)" <|
             \_ ->
-                N.mul oneHundredNines oneHundredNines
+                BigInt.mul oneHundredNines oneHundredNines
         ]
 
 
@@ -41,11 +41,11 @@ divisionWithRemainderBenchmarks =
                 nines 10
 
             tenNinesSquared =
-                N.mul tenNines tenNines
+                BigInt.mul tenNines tenNines
           in
           benchmark "(999..9 (10 9's))^2 / 999..9 (10 9's)" <|
             \_ ->
-                tenNinesSquared |> N.divModBy tenNines
+                BigInt.divmod tenNinesSquared tenNines
         ]
 
 
@@ -54,11 +54,11 @@ exponentiationBenchmarks =
     describe "exponentiation"
         [ let
             oneThousand =
-                N.fromSafeInt 1000
+                BigInt.fromInt 1000
           in
           benchmark "2 ^ 1000" <|
             \_ ->
-                N.exp N.two oneThousand
+                BigInt.pow (BigInt.fromInt 2) oneThousand
         ]
 
 
@@ -67,17 +67,17 @@ comparisonBenchmarks =
     describe "compare"
         [ let
             oneThousandBase26Digits =
-                N.exp (N.exp N.two (N.fromSafeInt 26)) (N.fromSafeInt 999)
+                BigInt.pow (BigInt.pow (BigInt.fromInt 2) (BigInt.fromInt 26)) (BigInt.fromInt 999)
 
             a =
-                N.sub oneThousandBase26Digits N.one
+                BigInt.sub oneThousandBase26Digits (BigInt.fromInt 1)
 
             b =
-                N.sub oneThousandBase26Digits N.two
+                BigInt.sub oneThousandBase26Digits (BigInt.fromInt 2)
           in
           benchmark "compare (2^26)^999-1 and (2^26)^999-2" <|
             \_ ->
-                N.compare a b
+                BigInt.compare a b
         ]
 
 
@@ -85,11 +85,12 @@ comparisonBenchmarks =
 -- HELPERS
 
 
-nines : Int -> Natural
+nines : Int -> BigInt
 nines n =
     --
     -- Returns a natural number consisting of max(1, n), 9's.
     --
     List.repeat (max 1 n) '9'
         |> String.fromList
-        |> N.fromSafeString
+        |> BigInt.fromIntString
+        |> Maybe.withDefault (BigInt.fromInt 0)
