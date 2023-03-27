@@ -1549,12 +1549,6 @@ isBaseB b =
 
 sdAdd : List Int -> Int -> List Int
 sdAdd xsLE y =
-    --
-    -- TODO: Find improvements.
-    --
-    -- 1. Determine if we really need to use iDivModBy.
-    -- 2. Once y becomes 0 in sdAddHelper we should be able to stop adding
-    --    and return the result.
     case ( xsLE, y ) of
         ( _, 0 ) ->
             xsLE
@@ -1580,21 +1574,37 @@ sdAddHelper xsLE y zsBE =
     --
     -- - zsBE = [ z_m, ..., z_1, z_0 ] and 0 <= z_j <= base-1
     --
-    case xsLE of
+    if y == 0 then
+        sdAddPrepend zsBE xsLE
+
+    else
+        case xsLE of
+            [] ->
+                List.reverse <| y :: zsBE
+
+            x :: restXsLE ->
+                let
+                    sum =
+                        x + y
+
+                    ( carry, z ) =
+                        if sum < base then
+                            ( 0, sum )
+
+                        else
+                            ( 1, sum - base )
+                in
+                sdAddHelper restXsLE carry (z :: zsBE)
+
+
+sdAddPrepend : List Int -> List Int -> List Int
+sdAddPrepend digitsBE digitsLE =
+    case digitsBE of
         [] ->
-            List.reverse <|
-                if y == 0 then
-                    zsBE
+            digitsLE
 
-                else
-                    y :: zsBE
-
-        x :: restXsLE ->
-            let
-                ( carry, z ) =
-                    (x + y) |> iDivModBy base
-            in
-            sdAddHelper restXsLE carry (z :: zsBE)
+        d :: digitsBERest ->
+            sdAddPrepend digitsBERest (d :: digitsLE)
 
 
 sdMul : List Int -> Int -> List Int
