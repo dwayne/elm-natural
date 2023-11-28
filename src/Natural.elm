@@ -1258,7 +1258,7 @@ slowDivModBy ysLE xsLE =
 
 Division by 0 is not allowed. So, for all `n : Natural`,
 
-    divModBy zero n == Nothing
+    divBy zero n == Nothing
 
 -}
 divBy : Natural -> Natural -> Maybe Natural
