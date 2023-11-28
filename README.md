@@ -107,7 +107,7 @@ Many more examples can be found in the `examples/src` directory.
 ## Performance
 
 This library tries to provide a reasonably efficient implementation of
-multiple-precision arithmetic over the natural numbers while being written
+extended-precision arithmetic over the natural numbers while being written
 purely in Elm and using lists under the hood. Within that context it gives
 reasonable performance but you can be the judge based on the information
 provided below.
@@ -188,6 +188,6 @@ N.toString <| exp five (exp four (exp three two))
 
 ## Resources
 
-- Chapter 17 - Extended Precision Arithmetic of [C Interfaces and Implementations: Techniques for Creating Reusable Software](https://archive.org/details/cinterfacesimple0000hans) helped me figure out how to design, organize and build the library from the ground up.
+- Chapter 17 - Extended-Precision Arithmetic of [C Interfaces and Implementations: Techniques for Creating Reusable Software](https://archive.org/details/cinterfacesimple0000hans) helped me figure out how to design, organize and build the library from the ground up.
 - [Lua Bint](https://github.com/edubart/lua-bint/tree/c73268472aa48554cf337c29b7550ce127f424a8#examples) inspired the examples.
 - [Per Brinch Hansen, Multiple-Length Division Revisited: A Tour of the Minefield](https://surface.syr.edu/cgi/viewcontent.cgi?article=1162&context=eecs_techreports) helped me implement an efficient divide-and-correct algorithm for division with remainder.
