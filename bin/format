@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
-cd "$project" &&    \
-  elm-format        \
-    benchmarks      \
-    examples/src    \
-    examples/tests  \
-    review/src      \
-    src             \
-    tests           \
+cd "${project:?}" && \
+  elm-format         \
+    benchmarks       \
+    examples         \
+    review           \
+    src              \
+    tests            \
     "${@:---yes}"

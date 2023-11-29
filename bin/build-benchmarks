@@ -1,4 +1,24 @@
 #!/usr/bin/env bash
 
-cd "$project/benchmarks" && \
-  elm-optimize-level-2 Main.elm --optimize-speed --output benchmarks.js
+set -e
+
+src="${project:?}/benchmarks"
+out="${build:?}/benchmarks"
+
+clean_out () {
+  rm -rf "$out"
+}
+
+init_out () {
+  mkdir -p "$out"
+}
+
+build_html () {
+  cp "$src"/*.html "$out"
+}
+
+build_js () {
+  elm-optimize-level-2 "$src/Main.elm" --optimize-speed --output "$out/benchmarks.js"
+}
+
+cd "$src" && clean_out && init_out && build_html && build_js

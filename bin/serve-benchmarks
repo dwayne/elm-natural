@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+port="${1:-8000}"
+root="${build:?}/benchmarks"
+
+caddy file-server --listen :"$port" --root "$root"

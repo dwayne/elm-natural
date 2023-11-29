@@ -21,6 +21,7 @@
             elm-format
             elm-optimize-level-2
             elm-test
+            pkgs.caddy
             pkgs.nodejs-18_x
             pkgs.racket
           ];
@@ -28,6 +29,7 @@
           shellHook =
             ''
             export project="$PWD"
+            export build="$project/.build"
             export PATH="$project/bin:$PATH"
 
             npm install --loglevel error >/dev/null
