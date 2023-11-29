@@ -1,7 +1,7 @@
 module Natural exposing
     ( Natural, maxSafeInt
     , zero, one, two, three, four, five, six, seven, eight, nine, ten
-    , fromInt, fromSafeInt, fromBinaryString, fromOctalString, fromHexString, fromString, fromSafeString, fromBaseBString
+    , fromInt, fromSafeInt, fromBinaryString, fromOctalString, fromDecimalString, fromHexString, fromString, fromSafeString, fromBaseBString
     , compare, isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual, max, min
     , isZero, isOne, isPositive, isEven, isOdd
     , add, sub, mul, divModBy, divBy, modBy, exp
@@ -24,7 +24,7 @@ module Natural exposing
 
 # Constructors
 
-@docs fromInt, fromSafeInt, fromBinaryString, fromOctalString, fromHexString, fromString, fromSafeString, fromBaseBString
+@docs fromInt, fromSafeInt, fromBinaryString, fromOctalString, fromDecimalString, fromHexString, fromString, fromSafeString, fromBaseBString
 
 
 # Comparison
@@ -317,6 +317,28 @@ For e.g.
 fromOctalString : String -> Maybe Natural
 fromOctalString =
     fromBaseBString 8
+
+
+{-| Create the natural number represented by the given decimal string.
+
+```txt
+decimal ::= [0-9]+
+```
+
+For e.g.
+
+    fromDecimalString "0" == Just zero
+
+    fromDecimalString "10" == Just ten
+
+    fromDecimalString "" == Nothing
+
+    fromDecimalString "A" == Nothing
+
+-}
+fromDecimalString : String -> Maybe Natural
+fromDecimalString =
+    fromBaseBString 10
 
 
 {-| Create the natural number represented by the given hexadecimal string.
