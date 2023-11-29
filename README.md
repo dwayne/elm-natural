@@ -28,6 +28,7 @@ A pure Elm library for computing with the [natural numbers](https://en.wikipedia
 
 - `fromBinaryString`
 - `fromOctalString`
+- `fromDecimalString`
 - `fromHexString`
 - `fromString` (supports binary, octal, hexadecimal, and decimal input formats)
 - `fromSafeString`
@@ -70,8 +71,9 @@ A pure Elm library for computing with the [natural numbers](https://en.wikipedia
 
 - `toBinaryString`
 - `toOctalString`
+- `toDecimalString`
 - `toHexString`
-- `toString` (decimal representation)
+- `toString` (same as `toDecimalString`)
 - `toBaseBString`
 
 ## Examples
