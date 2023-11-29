@@ -5,7 +5,7 @@ module Natural exposing
     , compare, isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual, max, min
     , isZero, isOne, isPositive, isEven, isOdd
     , add, sub, mul, divModBy, divBy, modBy, exp
-    , toInt, toBinaryString, toOctalString, toHexString, toString, toBaseBString
+    , toInt, toBinaryString, toOctalString, toDecimalString, toHexString, toString, toBaseBString
     )
 
 {-| Compute with the [natural numbers](https://en.wikipedia.org/wiki/Natural_number),
@@ -52,7 +52,7 @@ For all other comparisons you will have to use the functions below.
 
 # Conversion
 
-@docs toInt, toBinaryString, toOctalString, toHexString, toString, toBaseBString
+@docs toInt, toBinaryString, toOctalString, toDecimalString, toHexString, toString, toBaseBString
 
 -}
 
@@ -1453,6 +1453,24 @@ toOctalString =
     toBaseBString 8 >> Maybe.withDefault ""
 
 
+{-| Convert any natural number to its decimal (base-10) representation.
+
+    toDecimalString zero == "0"
+
+    toDecimalString one == "1"
+
+    toDecimalString ten == "10"
+
+    toDecimalString (fromSafeInt 1729) == "1729"
+
+    toDecimalString (add (fromSafeInt maxSafeInt) one) == "9007199254740992"
+
+-}
+toDecimalString : Natural -> String
+toDecimalString =
+    toBaseBString 10 >> Maybe.withDefault ""
+
+
 {-| Convert any natural number to its hexadecimal (base-16) representation.
 
     toHexString zero == "0"
@@ -1471,22 +1489,11 @@ toHexString =
     toBaseBString 16 >> Maybe.withDefault ""
 
 
-{-| Convert any natural number to its decimal (base-10) representation.
-
-    toString zero == "0"
-
-    toString one == "1"
-
-    toString ten == "10"
-
-    toString (fromSafeInt 1729) == "1729"
-
-    toString (add (fromSafeInt maxSafeInt) one) == "9007199254740992"
-
+{-| An alias for [`toDecimalString`](#toDecimalString).
 -}
 toString : Natural -> String
 toString =
-    toBaseBString 10 >> Maybe.withDefault ""
+    toDecimalString
 
 
 {-| Convert any natural number to its base-`b` representation.
