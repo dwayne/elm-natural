@@ -8,6 +8,7 @@ set -euo pipefail
 
 cd "${project:?}" &&     \
   rm -rf                 \
+    .build               \
     benchmarks/elm-stuff \
     elm-stuff            \
     examples/elm-stuff   \
