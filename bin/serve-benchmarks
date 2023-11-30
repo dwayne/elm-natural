@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-port="${1:-8000}"
-root="${build:?}/benchmarks"
+#
+# Usage: [port=8002] serve-benchmarks
+#
 
-caddy file-server --listen :"$port" --root "$root"
+set -euo pipefail
+
+caddy file-server --listen :"${port:-8002}" --root "${build:?}/benchmarks"

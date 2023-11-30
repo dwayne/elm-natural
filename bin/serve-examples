@@ -1,3 +1,9 @@
 #!/usr/bin/env bash
 
-cd "$project/examples" && elm reactor "$@"
+#
+# Usage: serve-examples [args-for-elm-reactor]
+#
+
+set -euo pipefail
+
+cd "${project:?}/examples" && elm reactor "$@"

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-set -e
+#
+# Usage: build-benchmarks
+#
+
+set -euo pipefail
 
 src="${project:?}/benchmarks"
 out="${build:?}/benchmarks"

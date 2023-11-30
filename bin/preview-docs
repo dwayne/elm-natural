@@ -1,3 +1,9 @@
 #!/usr/bin/env bash
 
-cd "$project" && elm-doc-preview --port 8001 "$@"
+#
+# Usage: [port=8001] preview-docs [args-for-elm-doc-preview]
+#
+
+set -euo pipefail
+
+cd "${project:?}" && elm-doc-preview --port "${port:-8001}" "$@"

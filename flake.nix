@@ -24,6 +24,7 @@
             pkgs.caddy
             pkgs.nodejs-18_x
             pkgs.racket
+            pkgs.shellcheck
           ];
 
           shellHook =

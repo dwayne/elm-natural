@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
-cd "$project" &&    \
-  npx elm-review    \
-    benchmarks      \
-    examples/src    \
-    examples/tests  \
-    review/src      \
-    src             \
-    tests           \
+#
+# Usage: review [args-for-elm-review]
+#
+
+set -euo pipefail
+
+cd "${project:?}" &&     \
+  npx elm-review         \
+    benchmarks           \
+    examples/{src,tests} \
+    review/src           \
+    src                  \
+    tests                \
     "$@"

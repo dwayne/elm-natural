@@ -16,7 +16,7 @@ $ build-benchmarks
 ### Run
 
 ```sh
-$ [port=8000] serve-benchmarks
+$ [port=8002] serve-benchmarks
 ```
 
-Then, open `http://localhost:8000` in your browser to run the benchmarks.
+Then, open `http://localhost:8002` in your browser to run the benchmarks.
