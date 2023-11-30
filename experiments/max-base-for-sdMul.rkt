@@ -1,5 +1,9 @@
 #lang racket
 
+;;
+;; Usage: racket experiments/max-base-for-sdMul.rkt
+;;
+
 (define (inequality n)
   (<= (- (expt 2 (* 2 n))
          (expt 2 n))
