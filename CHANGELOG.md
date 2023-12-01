@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2023-12-01
+
 ### Added
 
 - `fromDecimalString`
@@ -21,6 +23,7 @@
 
 The genesis event.
 
-[unreleased]: https://github.com/dwayne/elm-natural/compare/1.0.1...HEAD
+[unreleased]: https://github.com/dwayne/elm-natural/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/dwayne/elm-natural/compare/1.0.1...1.1.0
 [1.0.1]: https://github.com/dwayne/elm-natural/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/dwayne/elm-natural/releases/tag/1.0.0

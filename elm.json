@@ -3,7 +3,7 @@
     "name": "dwayne/elm-natural",
     "summary": "The natural numbers, ℕ = { 0, 1, 2, ... }",
     "license": "BSD-3-Clause",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "exposed-modules": [
         "Natural"
     ],
