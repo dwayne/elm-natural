@@ -1,30 +1,39 @@
 module Natural exposing
-    ( Natural, maxSafeInt
+    ( Natural
     , zero, one, two, three, four, five, six, seven, eight, nine, ten
-    , fromInt, fromSafeInt, fromBinaryString, fromOctalString, fromDecimalString, fromHexString, fromString, fromSafeString, fromBaseBString
+    , maxSafeInt
+    , fromSafeInt, fromInt, fromSafeString, fromString, fromBinaryString, fromOctalString, fromDecimalString, fromHexString, fromBaseBString
     , compare, isLessThan, isLessThanOrEqual, isGreaterThan, isGreaterThanOrEqual, max, min
     , isZero, isOne, isPositive, isEven, isOdd
     , add, sub, mul, divModBy, divBy, modBy, exp
-    , toInt, toBinaryString, toOctalString, toDecimalString, toHexString, toString, toBaseBString
+    , toInt, toString, toBinaryString, toOctalString, toDecimalString, toHexString, toBaseBString
     )
 
-{-| Compute with the [natural numbers](https://en.wikipedia.org/wiki/Natural_number),
-ℕ = { 0, 1, 2, ... }.
+{-| Compute with the [natural numbers](https://en.wikipedia.org/wiki/Natural_number), ℕ = { 0, 1, 2, ... }.
 
 
 # Representation
 
-@docs Natural, maxSafeInt
+@docs Natural
 
 
 # Constants
 
+The natural numbers from [`0`](#zero) to [`10`](#ten) inclusive are named.
+
 @docs zero, one, two, three, four, five, six, seven, eight, nine, ten
+
+
+# Limits
+
+Let `n : Int`. If `0 <= n <= maxSafeInt` then `n` is called a **safe `Int`**.
+
+@docs maxSafeInt
 
 
 # Constructors
 
-@docs fromInt, fromSafeInt, fromBinaryString, fromOctalString, fromDecimalString, fromHexString, fromString, fromSafeString, fromBaseBString
+@docs fromSafeInt, fromInt, fromSafeString, fromString, fromBinaryString, fromOctalString, fromDecimalString, fromHexString, fromBaseBString
 
 
 # Comparison
@@ -52,7 +61,7 @@ For all other comparisons you will have to use the functions below.
 
 # Conversion
 
-@docs toInt, toBinaryString, toOctalString, toDecimalString, toHexString, toString, toBaseBString
+@docs toInt, toString, toBinaryString, toOctalString, toDecimalString, toHexString, toBaseBString
 
 -}
 
@@ -84,9 +93,8 @@ baseMask =
     base - 1
 
 
-{-| The largest integer, currently `2^53 - 1`, which can be given as input to
-[`fromInt`](#fromInt) and [`fromSafeInt`](#fromSafeInt) without causing
-problems.
+{-| The largest `Int`, currently `2^53 - 1 = 9007199254740991`, which can be given as input to
+[`fromSafeInt`](#fromSafeInt) and [`fromInt`](#fromInt) without causing problems.
 -}
 maxSafeInt : Int
 maxSafeInt =
@@ -100,8 +108,8 @@ maxBits =
 
 {-| A representation of the natural numbers.
 
-The size of the numbers you can compute with is only limited by the
-available memory.
+**N.B.** _The size of the numbers you can compute with is only limited by the
+available memory._
 
 -}
 type
@@ -126,7 +134,7 @@ type
 -- CONSTANTS
 
 
-{-| The natural number [0](https://en.wikipedia.org/wiki/0).
+{-| The natural number [`0`](https://en.wikipedia.org/wiki/0).
 
 To be more precise, it is a representation of the natural number 0. However, I
 will not have any cause to make that distinction. A similar remark can be made
@@ -138,70 +146,70 @@ zero =
     Natural []
 
 
-{-| The natural number [1](https://en.wikipedia.org/wiki/1).
+{-| The natural number [`1`](https://en.wikipedia.org/wiki/1).
 -}
 one : Natural
 one =
     Natural [ 1 ]
 
 
-{-| The natural number [2](https://en.wikipedia.org/wiki/2).
+{-| The natural number [`2`](https://en.wikipedia.org/wiki/2).
 -}
 two : Natural
 two =
     Natural [ 2 ]
 
 
-{-| The natural number [3](https://en.wikipedia.org/wiki/3).
+{-| The natural number [`3`](https://en.wikipedia.org/wiki/3).
 -}
 three : Natural
 three =
     Natural [ 3 ]
 
 
-{-| The natural number [4](https://en.wikipedia.org/wiki/4).
+{-| The natural number [`4`](https://en.wikipedia.org/wiki/4).
 -}
 four : Natural
 four =
     Natural [ 4 ]
 
 
-{-| The natural number [5](https://en.wikipedia.org/wiki/5).
+{-| The natural number [`5`](https://en.wikipedia.org/wiki/5).
 -}
 five : Natural
 five =
     Natural [ 5 ]
 
 
-{-| The natural number [6](https://en.wikipedia.org/wiki/6).
+{-| The natural number [`6`](https://en.wikipedia.org/wiki/6).
 -}
 six : Natural
 six =
     Natural [ 6 ]
 
 
-{-| The natural number [7](https://en.wikipedia.org/wiki/7).
+{-| The natural number [`7`](https://en.wikipedia.org/wiki/7).
 -}
 seven : Natural
 seven =
     Natural [ 7 ]
 
 
-{-| The natural number [8](https://en.wikipedia.org/wiki/8).
+{-| The natural number [`8`](https://en.wikipedia.org/wiki/8).
 -}
 eight : Natural
 eight =
     Natural [ 8 ]
 
 
-{-| The natural number [9](https://en.wikipedia.org/wiki/9).
+{-| The natural number [`9`](https://en.wikipedia.org/wiki/9).
 -}
 nine : Natural
 nine =
     Natural [ 9 ]
 
 
-{-| The natural number [10](https://en.wikipedia.org/wiki/10).
+{-| The natural number [`10`](https://en.wikipedia.org/wiki/10).
 -}
 ten : Natural
 ten =
@@ -212,7 +220,7 @@ ten =
 -- CONSTRUCTORS
 
 
-{-| Create the natural number represented by the given integer.
+{-| Create the natural number represented by the given `Int`.
 
     fromInt 0 == Just zero
 
@@ -220,7 +228,7 @@ ten =
 
     fromInt maxSafeInt == fromString "9007199254740991"
 
-Unless the integer is negative or greater than [`maxSafeInt`](#maxSafeInt).
+Unless the given `Int` is negative or greater than [`maxSafeInt`](#maxSafeInt).
 
     fromInt -1 == Nothing
 
@@ -236,17 +244,23 @@ fromInt x =
         Nothing
 
 
-{-| Use this function when you know the integer is non-negative and less than
-or equal to [`maxSafeInt`](#maxSafeInt).
+{-| Use this function when you know the given `Int` is a [safe `Int`](#limits).
 
-If the integer isn't in the safe range then [zero](#zero) is returned.
+    fromSafeInt 0 == zero
+
+    fromSafeInt 1 == one
+
+    fromSafeInt maxSafeInt == fromSafeString "9007199254740991"
+
+If the given `Int` isn't safe then [zero](#zero) is returned.
 
     fromSafeInt -1 == zero
 
     fromSafeInt (maxSafeInt + 1) == zero
 
 This function is useful for establising **small constants** in a calculation.
-For e.g. to compute the first 100 digits of π the natural number 239 is needed.
+For e.g. to [compute the first 100 digits of π using John Machin's formula](https://en.wikipedia.org/wiki/Machin-like_formula)
+the natural number 239 is needed.
 
     twoThirtyNine : Natural
     twoThirtyNine =
@@ -288,8 +302,10 @@ For e.g.
     fromBinaryString "1010" == Just ten
 
     fromBinaryString "" == Nothing
+    -- Because the string is empty.
 
     fromBinaryString "2" == Nothing
+    -- Because '2' is not a binary digit.
 
 -}
 fromBinaryString : String -> Maybe Natural
@@ -310,8 +326,10 @@ For e.g.
     fromOctalString "12" == Just ten
 
     fromOctalString "" == Nothing
+    -- Because the string is empty.
 
     fromOctalString "8" == Nothing
+    -- Because '8' is not an octal digit.
 
 -}
 fromOctalString : String -> Maybe Natural
@@ -332,8 +350,10 @@ For e.g.
     fromDecimalString "10" == Just ten
 
     fromDecimalString "" == Nothing
+    -- Because the string is empty.
 
     fromDecimalString "A" == Nothing
+    -- Because 'A' is not a decimal digit.
 
 -}
 fromDecimalString : String -> Maybe Natural
@@ -358,8 +378,10 @@ For e.g.
     fromHexString "FE" == fromInt 254
 
     fromHexString "" == Nothing
+    -- Because the string is empty.
 
-    fromHexString "G" == Nothing
+    fromHexString "5g" == Nothing
+    -- Because 'g' is not a hexadecimal digit.
 
 -}
 fromHexString : String -> Maybe Natural
@@ -369,15 +391,19 @@ fromHexString =
 
 {-| Create the natural number represented by the given string.
 
+
+### Syntax for `fromString` input
+
 ```txt
-input   ::= ('0b' | '0B') binary
-          | ('0o' | '0O') octal
-          | ('0x' | '0X') hex
-          | decimal
-binary  ::= [0-1]+
-octal   ::= [0-7]+
-hex     ::= [0-9a-fA-F]+
-decimal ::= [0-9]+
+input    ::= unsigned
+unsigned ::= ('0b' | '0B') binary
+           | ('0o' | '0O') octal
+           | ('0x' | '0X') hex
+           | decimal
+binary   ::= [0-1]+
+octal    ::= [0-7]+
+hex      ::= [0-9a-fA-F]+
+decimal  ::= [0-9]+
 ```
 
 For e.g.
@@ -391,10 +417,13 @@ For e.g.
     fromString "173" == fromInt 173
 
     fromString "b10101101" == Nothing
+    -- Because the leading '0' is missing.
 
     fromString "aD" == Nothing
+    -- Because 'a' is not a decimal digit.
 
     fromString "0x" == Nothing
+    -- Because there must be at least one hexadecimal digit.
 
 -}
 fromString : String -> Maybe Natural
@@ -418,9 +447,13 @@ fromString input =
         fromBaseBString 10 input
 
 
-{-| It's best to use this function when you know the string you're
-dealing with is a valid input to the `fromString` function. If the input is
-invalid then `zero` is returned.
+{-| It's best to use this function when you can guarantee that the string you're
+dealing with is a valid input to the [`fromString`](#fromString) function.
+
+If the input is invalid then [`zero`](#zero) is returned.
+
+**N.B.** _Read the documentation of [`fromString`](#fromString) to learn what's considered
+to be valid or invalid input to this function._
 
 This function is useful for establishing **large constants** in a calculation.
 
@@ -433,9 +466,8 @@ Learn more about a [googol](https://en.wikipedia.org/wiki/Googol).
 
 **What's considered a large constant?**
 
-Since `fromSafeInt n` can be used for `0 <= n <= maxSafeInt` then it makes sense
-to consider any number larger than [`maxSafeInt`](#maxSafeInt), a large
-constant.
+Let `n : Int`, since `fromSafeInt n` can be used for `0 <= n <= maxSafeInt` then it makes sense
+for a **large constant** to be any natural number larger than [`maxSafeInt`](#maxSafeInt).
 
 -}
 fromSafeString : String -> Natural
@@ -448,13 +480,13 @@ fromSafeString =
 `b` must be between 2 and 36 inclusive and each character in the string must be
 a valid base-`b` digit.
 
-**About base-`b` digits**
+
+### About base-`b` digits
 
 A valid base-`b` digit is any digit `d` such that `0 <= d <= b - 1`.
 
-For bases larger than 10, we use case-insensitive letters from the
-[Latin alphabet](https://en.wikipedia.org/wiki/Latin_alphabet) to represent the
-base-`b` digits that are 10 or larger. So,
+For bases larger than 10, we use case-insensitive letters from the [Latin alphabet](https://en.wikipedia.org/wiki/Latin_alphabet)
+to represent the base-`b` digits that are 10 or larger. So,
 
 ```txt
 A or a represents 10
@@ -470,6 +502,25 @@ If `b = 16` then the valid base-16 digits are `[0-9a-fA-F]`.
 
 If `b = 36` then the valid base-36 digits are `[0-9a-zA-Z]`.
 
+
+### Syntax for `fromBaseBString` input
+
+```txt
+input ::= [digit]+
+digit ::= [0-9a-zA-Z]
+```
+
+Valid strings when `b = 16`:
+
+`"0"`, `"123"`, `"aF"`, and `"Z"`
+
+Invalid strings when `b = 16`:
+
+  - `"+2"`, because `'+'` is not part of the allowed syntax,
+  - `"5g"`, because `'g'` is not a hexdecimal digit.
+
+For e.g.
+
     fromBaseBString 2 "1010" == Just ten
 
     fromBaseBString 16 "aD" == fromInt 173
@@ -477,8 +528,10 @@ If `b = 36` then the valid base-36 digits are `[0-9a-zA-Z]`.
     fromBaseBString 36 "z" == fromInt 35
 
     fromBaseBString 2 "" == Nothing
+    -- Because the string is empty.
 
     fromBaseBString 10 "A" == Nothing
+    -- Because 'A' is not a decimal digit.
 
 -}
 fromBaseBString : Int -> String -> Maybe Natural
@@ -592,11 +645,11 @@ compareLEHelper a b xsLE ysLE =
 
 {-| Determine if the second natural number is less than the first.
 
-    isLessThan eight two == True
+    (two |> isLessThan eight) == True
 
-    isLessThan two two == False
+    (two |> isLessThan two) == False
 
-    isLessThan two eight == False
+    (eight |> isLessThan two) == False
 
 -}
 isLessThan : Natural -> Natural -> Bool
@@ -608,11 +661,11 @@ isLessThan b a =
 {-| Determine if the second natural number is less than or equal to the
 first.
 
-    isLessThanOrEqual eight two == True
+    (two |> isLessThanOrEqual eight) == True
 
-    isLessThanOrEqual two two == True
+    (two |> isLessThanOrEqual two) == True
 
-    isLessThanOrEqual two eight == False
+    (eight |> isLessThanOrEqual two) == False
 
 -}
 isLessThanOrEqual : Natural -> Natural -> Bool
@@ -627,11 +680,11 @@ isLessThanOrEqual b a =
 
 {-| Determine if the second natural number is greater than the first.
 
-    isGreaterThan eight two == False
+    (two |> isGreaterThan eight) == False
 
-    isGreaterThan two two == False
+    (two |> isGreaterThan two) == False
 
-    isGreaterThan two eight == True
+    (eight |> isGreaterThan two) == True
 
 -}
 isGreaterThan : Natural -> Natural -> Bool
@@ -645,11 +698,11 @@ isGreaterThan b a =
 {-| Determine if the second natural number is greater than or equal to
 the first.
 
-    isGreaterThanOrEqual eight two == False
+    (two |> isGreaterThanOrEqual eight) == False
 
-    isGreaterThanOrEqual two two == True
+    (two |> isGreaterThanOrEqual two) == True
 
-    isGreaterThanOrEqual two eight == True
+    (eight |> isGreaterThanOrEqual two) == True
 
 -}
 isGreaterThanOrEqual : Natural -> Natural -> Bool
@@ -698,7 +751,7 @@ min a b =
 -- PREDICATES
 
 
-{-| Determine if the natural number is 0.
+{-| Determine if the natural number is [`0`](#zero).
 
     isZero zero == True
 
@@ -710,7 +763,7 @@ isZero =
     (==) zero
 
 
-{-| Determine if the natural number is 1.
+{-| Determine if the natural number is [`1`](#one).
 
     isOne zero == False
 
@@ -722,11 +775,11 @@ isOne =
     (==) one
 
 
-{-| Determine if the natural number is positive.
+{-| Determine if the natural number is positive (i.e. greater than [`0`](#zero)).
+
+    isPositive five == True
 
     isPositive zero == False
-
-    isPositive one == True
 
 -}
 isPositive : Natural -> Bool
@@ -734,7 +787,7 @@ isPositive =
     not << isZero
 
 
-{-| Determine if the natural number is even.
+{-| Determine if the natural number is even (i.e. divisible by [`2`](#two)).
 
     isEven zero == True
 
@@ -755,7 +808,7 @@ isEven (Natural digitsLE) =
             Basics.modBy 2 d == 0
 
 
-{-| Determine if the natural number is odd.
+{-| Determine if the natural number is odd (i.e. not even, so not divisible by [`2`](#two)).
 
     isOdd zero == False
 
@@ -829,11 +882,13 @@ addHelper xsLE ysLE carry zsBE =
 {-| Subtract the second natural number from the first.
 
     sub ten four == six
+    -- 10 - 4 = 6
 
 It uses [saturating subtraction](https://en.wikipedia.org/wiki/Saturation_arithmetic).
 Thus, if the second natural number is larger than the first, 0 is returned.
 
     sub four ten == zero
+    -- 4 - 10 = 0
 
 -}
 sub : Natural -> Natural -> Natural
@@ -1023,21 +1078,32 @@ shiftLeftByHelper n digitsLE =
         shiftLeftByHelper (n - 1) (0 :: digitsLE)
 
 
-{-| Find the quotient and remainder when the second natural number is divided by
-the first. This is called [Euclidean division](https://en.wikipedia.org/wiki/Euclidean_division)
+{-| Find the quotient and remainder when the second natural number (the **dividend**) is divided by
+the first (the **divisor**).
+
+This operation performs [Euclidean division](https://en.wikipedia.org/wiki/Euclidean_division)
 or **division with remainder**.
+
+`divModBy d D` of two natural numbers `D` and `d ≠ 0`,
+is defined as producing two unique natural numbers `q` (the **quotient**) and `r` (the **remainder**)
+such that
+
+  - `d * q` is the greatest multiple of `d` less than or equal to `D`, and
+  - `r = D - d * q` such that `0 <= r < d`.
 
 For e.g.
 
-    divModBy two nine == Just ( four, one )
+    (ten |> divModBy two) == Just (five, zero)
+    -- Because 2 * 5 = 10 is the greatest multiple of 2 less than or equal to 10, and
+    -- 0 = 10 - 2 * 5 such that 0 <= 0 < 10.
 
-Why? Because,
+    (ten |> divModBy three) == Just (three, one)
+    -- Because 3 * 3 = 9 is the greatest multiple of 3 less than or equal to 10, and
+    -- 1 = 10 - 3 *3 such that 0 <= 1 < 10.
 
-    nine == add (mul four two) one
+Division by [`0`](#zero) is not allowed. So, for all `n : Natural`,
 
-Division by 0 is not allowed. So, for all `n : Natural`,
-
-    divModBy zero n == Nothing
+    (n |> divModBy zero) == Nothing
 
 -}
 divModBy : Natural -> Natural -> Maybe ( Natural, Natural )
@@ -1276,11 +1342,7 @@ slowDivModBy ysLE xsLE =
 
 {-| Find the quotient when the second natural number is divided by the first.
 
-    divBy two nine == Just four
-
-Division by 0 is not allowed. So, for all `n : Natural`,
-
-    divBy zero n == Nothing
+**N.B.** _Please see [`divModBy`](#divModBy) to understand how the quotient is computed._
 
 -}
 divBy : Natural -> Natural -> Maybe Natural
@@ -1293,11 +1355,7 @@ divBy divisor =
 
 {-| Find the remainder when the second natural number is divided by the first.
 
-    modBy two nine == Just one
-
-Modulo by 0 is not allowed. So, for all `n : Natural`,
-
-    modBy zero n == Nothing
+**N.B.** _Please see [`divModBy`](#divModBy) to understand how the remainder is computed._
 
 -}
 modBy : Natural -> Natural -> Maybe Natural
@@ -1308,20 +1366,24 @@ modBy divisor =
     divModBy divisor >> Maybe.map Tuple.second
 
 
-{-| Find the power of the first natural number (called the base) to the second
-natural number (called the exponent).
+{-| Find the power of the first natural number (the **base**) to the second
+natural number (the **exponent**).
 
     exp two three == eight
 
-For all `p : Natural`, where `p >= 1` (i.e. `p` is a positive natural number),
+For all `n : Natural`,
 
-    exp p zero == one
+    exp n zero == one
 
-    exp zero p == zero
-
-**[What is `0^0`?](https://www.maa.org/book/export/html/116806)**
+In particular,
 
     exp zero zero == one
+
+**N.B.** _You can read "[What is `0^0`?](https://maa.org/book/export/html/116806)" to learn more_.
+
+For all `n : Natural`, where `n` is positive,
+
+    exp zero n == zero
 
 -}
 exp : Natural -> Natural -> Natural
