@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2023-12-03
+
+### Changed
+
+- Fixed a few minor mistakes in the documentation.
+- Updated this `CHANGELOG` with a few more notes on the [1.1.0] release.
+- Upgraded `nixpkgs` from 23.05 to 23.11.
+- Upgraded `elm-review` from 2.9.1 to 2.10.3.
+
 ## [1.1.0] - 2023-12-01
 
 ### Added
@@ -35,7 +44,8 @@
 
 The genesis event.
 
-[unreleased]: https://github.com/dwayne/elm-natural/compare/1.1.0...HEAD
+[unreleased]: https://github.com/dwayne/elm-natural/compare/1.1.1...HEAD
+[1.1.1]: https://github.com/dwayne/elm-natural/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/dwayne/elm-natural/compare/1.0.1...1.1.0
 [1.0.1]: https://github.com/dwayne/elm-natural/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/dwayne/elm-natural/releases/tag/1.0.0
