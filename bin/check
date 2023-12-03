@@ -13,29 +13,50 @@ fail () {
   exit 1
 }
 
+# Check scripts
+
 if ! check-scripts &>/dev/null; then
   fail "One or more scripts have issues. Run: check-scripts"
 fi
 
+# Format
+
 if ! format --validate &>/dev/null; then
   fail "Your code needs to be formatted. Run: format"
+fi
+
+# Natural
+
+build-natural () {
+  cd "$project" && elm make "$project/src/Natural.elm" --output=/dev/null
+}
+
+if ! (build-natural &>/dev/null); then
+  echo "Build failed for build-natural!"
+  build-natural
 fi
 
 if ! (cd "$project" && elm-test &>/dev/null); then
   fail "One or more tests failed. Run: elm-test"
 fi
 
-if ! (cd "$project/examples" && elm-test &>/dev/null); then
-  fail "One or more tests failed. Run: cd \"$project/examples\" && elm-test"
-fi
+# Examples
 
 for main in "$project"/src/*.elm "$project"/examples/src/*.elm; do
   cd "${main%/src/*.elm}" && elm make "$main" --output=/dev/null || exit 1
 done >/dev/null
 
+if ! (cd "$project/examples" && elm-test &>/dev/null); then
+  fail "One or more tests failed. Run: cd \"$project/examples\" && elm-test"
+fi
+
+# Benchmarks
+
 if ! build-benchmarks &>/dev/null; then
   fail "There was a problem building your benchmarks. Run: build-benchmarks"
 fi
+
+# Review
 
 if ! review &>/dev/null; then
   fail "One or more reviews failed. Run: review"
