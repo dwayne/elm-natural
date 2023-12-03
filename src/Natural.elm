@@ -136,7 +136,7 @@ type
 
 {-| The natural number [`0`](https://en.wikipedia.org/wiki/0).
 
-To be more precise, it is a representation of the natural number 0. However, I
+To be more precise, it is a representation of the natural number `0`. However, I
 will not have any cause to make that distinction. A similar remark can be made
 about the other constants.
 
@@ -220,7 +220,7 @@ ten =
 -- CONSTRUCTORS
 
 
-{-| Create the natural number represented by the given `Int`.
+{-| Create the natural number that represents the given `Int`.
 
     fromInt 0 == Just zero
 
@@ -464,10 +464,10 @@ This function is useful for establishing **large constants** in a calculation.
 
 Learn more about a [googol](https://en.wikipedia.org/wiki/Googol).
 
-**What's considered a large constant?**
+### What's considered a large constant?
 
 Let `n : Int`, since `fromSafeInt n` can be used for `0 <= n <= maxSafeInt` then it makes sense
-for a **large constant** to be any natural number larger than [`maxSafeInt`](#maxSafeInt).
+to consider any natural number larger than [`maxSafeInt`](#maxSafeInt), a large constant.
 
 -}
 fromSafeString : String -> Natural
@@ -512,7 +512,7 @@ digit ::= [0-9a-zA-Z]
 
 Valid strings when `b = 16`:
 
-`"0"`, `"123"`, `"aF"`, and `"Z"`
+`"0"`, `"123"`, and `"Ff"`.
 
 Invalid strings when `b = 16`:
 
