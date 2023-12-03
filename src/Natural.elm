@@ -464,6 +464,7 @@ This function is useful for establishing **large constants** in a calculation.
 
 Learn more about a [googol](https://en.wikipedia.org/wiki/Googol).
 
+
 ### What's considered a large constant?
 
 Let `n : Int`, since `fromSafeInt n` can be used for `0 <= n <= maxSafeInt` then it makes sense
